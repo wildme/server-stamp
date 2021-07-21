@@ -9,3 +9,5 @@ const inboxSchema = mongoose.Schema({
   notes: String,
 });
 
+const Inbox = mongoose.model('Inbox', inboxSchema);
+module.exports = Inbox;
