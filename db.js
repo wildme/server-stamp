@@ -10,3 +10,31 @@ db.on('error', err => {
 });
 db.once('open', () => console.log('Connection established'));
 
+const Inbox = require('./models/inbox.js');
+//const counter = Inbox.countDocuments({}, function(err, c) {return c});
+Inbox.find((err, docs) => {
+  if(err) console.error(err);
+  if(docs.length) return;
+
+  new Inbox({
+    id: 1,
+    from: 'Duckburg',
+    subject: 'Test1',
+    date: new Date,
+    addedBy: 'Me',
+    notes: 'TEST1'
+  }).save();
+
+  new Inbox({
+    id: 2,
+    from: 'Gotham',
+    subject: 'Test2',
+    date: new Date,
+    addedBy: 'Me',
+    notes: 'TEST2'
+  }).save();
+});
+
+module.exports = {
+  getInbox: async () => Inbox.find()
+};
