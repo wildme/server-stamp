@@ -36,5 +36,5 @@ Inbox.find((err, docs) => {
 });
 
 module.exports = {
-  getInbox: async () => Inbox.find()
+  getInbox: async () => Inbox.find({})
 };
