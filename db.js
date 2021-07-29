@@ -11,7 +11,7 @@ db.on('error', err => {
 db.once('open', () => console.log('Connection established'));
 
 const Inbox = require('./models/inbox.js');
-//const counter = Inbox.countDocuments({}, function(err, c) {return c});
+
 Inbox.find((err, docs) => {
   if(err) console.error(err);
   if(docs.length) return;
@@ -36,5 +36,6 @@ Inbox.find((err, docs) => {
 });
 
 module.exports = {
-  getInbox: async () => Inbox.find({})
+  getInbox: async () => Inbox.find({}),
+  sortedInbox: async (field, order) => Inbox.find({}).sort({field:order})
 };
