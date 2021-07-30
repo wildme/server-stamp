@@ -36,6 +36,5 @@ Inbox.find((err, docs) => {
 });
 
 module.exports = {
-  getInbox: async () => Inbox.find({}),
-  sortedInbox: async (field, order) => Inbox.find({}).sort({field:order})
+  getInbox: async (field, order) => Inbox.find({}).sort([[field, order]])
 };
