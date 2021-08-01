@@ -12,29 +12,11 @@ db.once('open', () => console.log('Connection established'));
 
 const Inbox = require('./models/inbox.js');
 
-Inbox.find((err, docs) => {
-  if(err) console.error(err);
-  if(docs.length) return;
-
-  new Inbox({
-    id: 1,
-    from: 'Duckburg',
-    subject: 'Test1',
-    date: new Date,
-    addedBy: 'Me',
-    notes: 'TEST1'
-  }).save();
-
-  new Inbox({
-    id: 2,
-    from: 'Gotham',
-    subject: 'Test2',
-    date: new Date,
-    addedBy: 'Me',
-    notes: 'TEST2'
-  }).save();
-});
-
 module.exports = {
-  getInbox: async (field, order) => Inbox.find({}).sort([[field, order]])
+  getInbox: async (field, order) => Inbox.find({}).sort([[field, order]]),
+  addInbox: async (subject, fromTo, addedBy, notes) => {
+    const doc = new Inbox({ id: 1, from: fromTo, subject: subject,
+      date: new Date, addedBy: addedBy, notes: notes });
+    doc.save();
+  }
 };
