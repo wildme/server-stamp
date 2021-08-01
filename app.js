@@ -15,6 +15,7 @@ app.use(bodyParser.json());
 const port =  process.env.PORT || 3001;
 
 app.get('/api/inbox', api.getInboxApi);
+app.post('/api/inbox/new', api.addInboxApi);
 
 app.listen(port, () => console.log(
   `Express is running at http://localhost:${port}`));
