@@ -11,12 +11,14 @@ db.on('error', err => {
 db.once('open', () => console.log('Connection established'));
 
 const Inbox = require('./models/inbox.js');
+const Outbox = require('./models/outbox.js');
+const LastId = require('./models/lastId.js');
 
 module.exports = {
   getInbox: async (field, order) => Inbox.find({}).sort([[field, order]]),
   addInbox: async (subject, fromTo, addedBy, notes) => {
     const doc = new Inbox({ id: 1, from: fromTo, subject: subject,
-      date: new Date, addedBy: addedBy, notes: notes });
+      addedBy: addedBy, notes: notes });
     doc.save();
   }
 };
