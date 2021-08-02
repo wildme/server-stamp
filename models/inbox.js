@@ -4,9 +4,9 @@ const inboxSchema = mongoose.Schema({
   id: Number,
   from: String,
   subject: String,
-  date: Date,
+  date: { type: Date, default: new Date },
   addedBy: String,
-  notes: String,
+  notes: String
 });
 
 const Inbox = mongoose.model('Inbox', inboxSchema);
