@@ -9,5 +9,5 @@ const outboxSchema = mongoose.Schema({
   notes: String,
 });
 
-const Outbox = mongoose.model('Outbox', OutboxSchema);
+const Outbox = mongoose.model('Outbox', outboxSchema);
 module.exports = Outbox;
