@@ -14,9 +14,9 @@ app.use(bodyParser.json());
 
 const port =  process.env.PORT || 3001;
 
-app.get('/api/inbox', api.getInboxApi);
+app.get('/api/:box', api.getBoxApi);
 app.get('/api/:box/:id', api.getItemByIdApi);
-app.post('/api/inbox/new', api.addInboxApi);
+app.post('/api/:box/new', api.addBoxApi);
 app.post('/api/:box/:id', api.editItemApi);
 
 app.listen(port, () => console.log(
