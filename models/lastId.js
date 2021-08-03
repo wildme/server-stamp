@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const lastIdSchema = mongoose.Schema({
-  inboxLastId: { type: Number, default: 0 },
-  outboxLastId: { type: Number, default: 0 }
+  box: { type: String }, 
+  lastId: { type: Number, default: 0 }
 });
 
 const lastId = mongoose.model('LastId', lastIdSchema);
