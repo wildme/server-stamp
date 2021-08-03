@@ -14,10 +14,22 @@ const Inbox = require('./models/inbox.js');
 const Outbox = require('./models/outbox.js');
 const LastId = require('./models/lastId.js');
 
+LastId.find((err, ids) => {
+  if(err) return console.error(err);
+  if(ids.length) return;
+
+  new LastId({ box: 'inbox'}).save();
+  new LastId({ box: 'outbox'}).save();
+});
+
 module.exports = {
   getInbox: async (field, order) => Inbox.find({}).sort([[field, order]]),
+  getItemById: async (box, id) => 
+    box === 'inbox' ? Inbox.find({id: id}) : Outbox.find({id: id}),
   addInbox: async (subject, fromTo, addedBy, notes) => {
-    const doc = new Inbox({ id: 1, from: fromTo, subject: subject,
+    await LastId.updateOne({box: 'inbox'}, {$inc: {lastId: 1}});
+    const id = await LastId.findOne({box: 'inbox'}, 'lastId')
+    const doc = new Inbox({ id: id.lastId, from: fromTo, subject: subject,
       addedBy: addedBy, notes: notes });
     doc.save();
   }
