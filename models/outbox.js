@@ -4,7 +4,7 @@ const outboxSchema = mongoose.Schema({
   id: Number,
   to: String,
   subject: String,
-  date: Date,
+  date: { type: Date, default: new Date },
   addedBy: String,
   notes: String,
 });
