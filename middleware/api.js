@@ -20,7 +20,9 @@ exports.addBoxApi = async (req, res) => {
     req.body.fromTo, req.body.addedBy, req.body.notes);
 };
 
-exports.editItemApi = async (req, res) => {
-  await db.editInbox(reg.body.id, req.body.subject,
-    req.body.fromTo, req.body.addedBy, req.body.notes);
+exports.updateItemByIdApi = async (req, res) => {
+  const page = req.params.box;
+  const id = req.params.id;
+  await db.updateItemById(id, page, req.body.subject,
+    req.body.fromTo, req.body.notes);
 };
