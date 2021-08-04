@@ -17,7 +17,7 @@ const port =  process.env.PORT || 3001;
 app.get('/api/:box', api.getBoxApi);
 app.get('/api/:box/:id', api.getItemByIdApi);
 app.post('/api/:box/new', api.addBoxApi);
-app.post('/api/:box/:id', api.editItemApi);
+app.post('/api/:box/update/:id', api.updateItemByIdApi);
 
 app.listen(port, () => console.log(
   `Express is running at http://localhost:${port}`));
