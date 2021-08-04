@@ -24,16 +24,24 @@ LastId.find((err, ids) => {
 
 module.exports = {
   getBox: async (page, field, order) =>
-  page === 'inbox' ? Inbox.find({}).sort([[field, order]]) : Outbox.find({}).sort([[field, order]]),
+  page === 'inbox' ?
+  Inbox.find({}).sort([[field, order]]) :
+  Outbox.find({}).sort([[field, order]]),
   getItemById: async (page, id) =>
-    page === 'inbox' ? Inbox.find({id: id}) : Outbox.find({id: id}),
+    page === 'inbox' ?
+  Inbox.find({id: id}) :
+  Outbox.find({id: id}),
+  updateItemById: async(id, page, subject, fromTo, notes) =>
+  page === 'inbox' ?
+  Inbox.updateOne({id: id}, {subject: subject, from: fromTo, notes: notes}) :
+  Outbox.updateOne({id: id}, {subject: subject, to: fromTo, notes: notes}),
   addBox: async (page, subject, fromTo, addedBy, notes) => {
     await LastId.updateOne({box: page}, {$inc: {lastId: 1}});
     const id = await LastId.findOne({box: page}, 'lastId')
     const doc = page === 'inbox' ?
       new Inbox({ id: id.lastId, from: fromTo, subject: subject,
         addedBy: addedBy, notes: notes }) :
-    new Outbox({ id: id.lastId, to: fromTo, subject: subject,
+      new Outbox({ id: id.lastId, to: fromTo, subject: subject,
       addedBy: addedBy, notes: notes });
     doc.save();
   }
