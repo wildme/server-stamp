@@ -27,7 +27,7 @@ User.find((err, user) => {
   if (err) return console.error(err);
   if (user.length) return;
 
-  new User({id: 1, login: 'admin', password: 'admin',
+  new User({username: 'admin', password: 'admin',
     firstname: 'John', lastname: 'Doe', email: 'admin@example.com',
     administrator: true}).save();
 });
