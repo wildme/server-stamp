@@ -1,4 +1,7 @@
-const passport = require('passport');
+const passport =  require('passport');
+const jwt = require('jsonwebtoken');
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/user.js');
 
@@ -11,6 +14,18 @@ passport.deserializeUser(function(id, done) {
     done(err, user);
     });
 });
+
+passport.use(new JwtStrategy({
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: 'my_secret'
+},
+  function(jwt_payload, done) {
+    User.findById(jwt_payload.id, function(err, user) {
+      if (err) { return done(err, false); }
+      if (user) { return done(null, user); }
+      else { return done(null, false); }
+    });
+  }));
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
@@ -34,12 +49,16 @@ exports.init = (app) => {
 };
 
 exports.loginApi = (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
+  passport.authenticate('local', {session: false }, (err, user, info) => {
     if (err) return next(err);
-    if (!user)  return res.redirect('/login');
+    if (!user) { 
+      return res.status(401).redirect('/login');
+    }
     req.logIn(user, (err) => {
       if (err)  return next(err);
-      return res.redirect('/');
+      //const token = jwt.sign(user, 'my_secret');
+      //return res.json({user, token});
+      return res.status(200).redirect('/');
       })
     })(req, res, next);
 };
