@@ -1,4 +1,4 @@
-const passport =  require('passport');
+const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
@@ -20,7 +20,7 @@ passport.use(new JwtStrategy({
   secretOrKey: 'my_secret'
 },
   function(jwt_payload, done) {
-    User.findById(jwt_payload.id, function(err, user) {
+    User.findById(jwt_payload.sub, function(err, user) {
       if (err) { return done(err, false); }
       if (user) { return done(null, user); }
       else { return done(null, false); }
@@ -49,16 +49,30 @@ exports.init = (app) => {
 };
 
 exports.loginApi = (req, res, next) => {
-  passport.authenticate('local', {session: false }, (err, user, info) => {
+  passport.authenticate('local', { session: false }, (err, user, info) => {
     if (err) return next(err);
-    if (!user) { 
-      return res.status(401).redirect('/login');
-    }
+    if (!user) return res.status(401).json(info.message);
     req.logIn(user, (err) => {
       if (err)  return next(err);
-      //const token = jwt.sign(user, 'my_secret');
-      //return res.json({user, token});
-      return res.status(200).redirect('/');
+      const payload = {
+        sub: user._id,
+        exp: Date.now() + 60000,
+        username: user.username,
+        admin: user.administrator
+      };
+      const token = jwt.sign(payload, 'my_secret');
+      return res.cookie('jwt', token, {httpOnly: true}).json({ jwt: token });
       })
     })(req, res, next);
+};
+
+exports.tokenApi = (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+    if (err) return next(err);
+    if (!user) return res.status(403).json('Forbidden');
+    const userData = { username: user.username, 
+      admin: user.administrator,
+      firstname: user.firstname }
+    return res.status(200).json(userData);
+  })(req, res, next);
 };
