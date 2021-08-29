@@ -1,6 +1,6 @@
 const express = require('express');
 const session = require('express-session');
-//const cookieparser = require('cookie-parser');
+const cookieparser = require('cookie-parser');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
@@ -13,7 +13,7 @@ app.use('/api', cors());
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
-//app.use(cookieparser());
+app.use(cookieparser());
 app.use(session({
   name: 'session-id',
   secret: '123-456-789',
@@ -24,6 +24,7 @@ app.use(session({
 const port =  process.env.PORT || 3001;
 auth.init(app);
 
+app.get('/api/token', auth.tokenApi);
 app.get('/api/:box', api.getBoxApi);
 app.get('/api/:box/:id', api.getItemByIdApi);
 app.post('/api/:box/new', api.addBoxApi);
