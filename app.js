@@ -24,7 +24,7 @@ app.use(session({
 const port =  process.env.PORT || 3001;
 auth.init(app);
 
-app.get('/api/token', auth.tokenApi);
+app.get('/api/token', auth.refreshTokenApi);
 app.get('/api/:box', api.getBoxApi);
 app.get('/api/:box/:id', api.getItemByIdApi);
 app.post('/api/:box/new', api.addBoxApi);
