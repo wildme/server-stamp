@@ -60,19 +60,24 @@ exports.loginApi = (req, res, next) => {
         username: user.username,
         admin: user.administrator
       };
-      const token = jwt.sign(payload, 'my_secret');
-      return res.cookie('jwt', token, {httpOnly: true}).json({ jwt: token });
+      const profile = { username: user.username, admin: user.administrator };
+      const accessToken = jwt.sign(payload, 'my_secret');
+      const refreshToken = jwt.sign(payload, 'my_secret');
+
+      return res.status(200).
+        cookie('jwt', refreshToken, { httpOnly: true, maxAge: 31536000000 })
+        .json({ user: profile , token: accessToken });
       })
     })(req, res, next);
 };
 
-exports.tokenApi = (req, res, next) => {
+exports.refreshTokenApi = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     if (err) return next(err);
     if (!user) return res.status(403).json('Forbidden');
-    const userData = { username: user.username, 
-      admin: user.administrator,
-      firstname: user.firstname }
-    return res.status(200).json(userData);
+    const profile = { username: user.username, admin: user.administrator }
+    const accessToken = jwt.sign(payload, 'my_secret');
+
+    return res.status(200).json({ user: profile, token: accessToken });
   })(req, res, next);
 };
