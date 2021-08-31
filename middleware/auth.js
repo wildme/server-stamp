@@ -16,7 +16,12 @@ passport.deserializeUser(function(id, done) {
 });
 
 passport.use(new JwtStrategy({
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  //jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: function(req) {
+    let refreshToken = null;
+    if (req && req.cookies) refreshToken = req.cookies['jwt'];
+    return refreshToken;
+  },
   secretOrKey: 'my_secret'
 },
   function(jwt_payload, done) {
@@ -62,10 +67,17 @@ exports.loginApi = (req, res, next) => {
       };
       const profile = { username: user.username, admin: user.administrator };
       const accessToken = jwt.sign(payload, 'my_secret');
-      const refreshToken = jwt.sign(payload, 'my_secret');
+      const refreshToken = undefined;
+
+      if (!req.cookies['jwt']) {
+        let refreshToken = jwt.sign(payload, 'my_secret');
+
+        return res.status(200)
+        .cookie('jwt', refreshToken, { httpOnly: true, maxAge: 31536000000 })
+        .json({ user: profile, token: accessToken });
+      }
 
       return res.status(200)
-        .cookie('jwt', refreshToken, { httpOnly: true, maxAge: 31536000000 })
         .json({ user: profile, token: accessToken });
       })
     })(req, res, next);
