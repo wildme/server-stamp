@@ -30,6 +30,7 @@ app.get('/api/:box/:id', api.getItemByIdApi);
 app.post('/api/:box/new', api.addBoxApi);
 app.post('/api/:box/update/:id', api.updateItemByIdApi);
 app.post('/api/login', auth.loginApi);
+app.post('/api/verify/token', auth.verifyTokenApi);
 
 app.listen(port, () => console.log(
   `Express is running at http://localhost:${port}`));
