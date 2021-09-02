@@ -59,21 +59,27 @@ exports.loginApi = (req, res, next) => {
     if (!user) return res.status(401).json(info.message);
     req.logIn(user, (err) => {
       if (err)  return next(err);
-      const payload = {
+      const accessToken_payload = {
         sub: user._id,
-        exp: Date.now() + 60000,
+        exp: Date.now() + 28800000,
+        username: user.username,
+        admin: user.administrator
+      };
+      const refreshToken_payload = {
+        sub: user._id,
+        exp: Date.now() + 2628000000,
         username: user.username,
         admin: user.administrator
       };
       const profile = { username: user.username, admin: user.administrator };
-      const accessToken = jwt.sign(payload, 'my_secret');
+      const accessToken = jwt.sign(accessToken_payload, 'my_secret');
       const refreshToken = undefined;
 
       if (!req.cookies['jwt']) {
-        let refreshToken = jwt.sign(payload, 'my_secret');
+        let refreshToken = jwt.sign(refreshToken_payload, 'my_secret');
 
         return res.status(200)
-        .cookie('jwt', refreshToken, { httpOnly: true, maxAge: 28800000 })
+        .cookie('jwt', refreshToken, { httpOnly: true, maxAge: 2628000000 })
         .json({ user: profile, token: accessToken });
       }
 
@@ -87,14 +93,14 @@ exports.refreshTokenApi = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     if (err) return next(err);
     if (!user) return res.status(401).send();
-    const payload = {
+    const accessToken_payload = {
         sub: user._id,
-        exp: Date.now() + 60000,
+        exp: Date.now() + 28800000,
         username: user.username,
         admin: user.administrator
       };
     const profile = { username: user.username, admin: user.administrator };
-    const accessToken = jwt.sign(payload, 'my_secret');
+    const accessToken = jwt.sign(accessToken_payload, 'my_secret');
 
     return res.status(200)
       .json({ user: profile, token: accessToken });
@@ -105,12 +111,14 @@ exports.verifyTokenApi = (req, res) => {
   jwt.verify(req.body.token, 'my_secret', (err, decoded) => {
     if (err) {
       if (err.message === 'jwt expired') {
-        return res.status(401).json({ info: "Session expired" });
+        console.log(err.message);
+        return res.status(401).send();
       }
-      console.log(err.message);
+      console.log(req.body.token);
+      console.log('Error: ', err.message);
       return res.status(401).send();
     } else {
-      return res.status(200).json({ user: decoded.username });
+      return res.status(200).send();
     }
   });
 };
