@@ -16,7 +16,6 @@ passport.deserializeUser(function(id, done) {
 });
 
 passport.use(new JwtStrategy({
-  //jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   jwtFromRequest: function(req) {
     let refreshToken = null;
     if (req && req.cookies) refreshToken = req.cookies['jwt'];
@@ -51,6 +50,12 @@ passport.use(new LocalStrategy(
 exports.init = (app) => {
   app.use(passport.initialize());
   app.use(passport.session());
+};
+
+exports.logoutApi = (req, res) => {
+  req.logOut();
+  console.log('User: ', req.user);
+  res.status(200).send();
 };
 
 exports.loginApi = (req, res, next) => {
