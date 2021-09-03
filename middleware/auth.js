@@ -116,11 +116,8 @@ exports.verifyTokenApi = (req, res) => {
   jwt.verify(req.body.token, 'my_secret', (err, decoded) => {
     if (err) {
       if (err.message === 'jwt expired') {
-        console.log(err.message);
         return res.status(401).send();
       }
-      console.log(req.body.token);
-      console.log('Error: ', err.message);
       return res.status(401).send();
     } else {
       return res.status(200).send();
