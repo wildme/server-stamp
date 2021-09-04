@@ -54,7 +54,7 @@ exports.init = (app) => {
 
 exports.logoutApi = (req, res) => {
   req.logOut();
-  console.log('User: ', req.user);
+  res.clearCookie('jwt');
   res.status(200).send();
 };
 

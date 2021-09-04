@@ -24,14 +24,14 @@ app.use(session({
 const port =  process.env.PORT || 3001;
 auth.init(app);
 
+app.get('/api/logout', auth.logoutApi);
 app.get('/api/token', auth.refreshTokenApi);
 app.get('/api/:box', api.getBoxApi);
 app.get('/api/:box/:id', api.getItemByIdApi);
-app.get('/api/logout', auth.logoutApi);
-app.post('/api/:box/new', api.addBoxApi);
-app.post('/api/:box/update/:id', api.updateItemByIdApi);
 app.post('/api/login', auth.loginApi);
 app.post('/api/verify/token', auth.verifyTokenApi);
+app.post('/api/:box/new', api.addBoxApi);
+app.post('/api/:box/update/:id', api.updateItemByIdApi);
 
 app.listen(port, () => console.log(
   `Express is running at http://localhost:${port}`));
