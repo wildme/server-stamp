@@ -66,13 +66,13 @@ exports.loginApi = (req, res, next) => {
       if (err)  return next(err);
       const accessToken_payload = {
         sub: user._id,
-        exp: Date.now() + 28800000,
+        exp: Date.now() + 60000,
         username: user.username,
         admin: user.administrator
       };
       const refreshToken_payload = {
         sub: user._id,
-        exp: Date.now() + 2628000000,
+        exp: Date.now() + 28800000,
         username: user.username,
         admin: user.administrator
       };
@@ -100,7 +100,7 @@ exports.refreshTokenApi = (req, res, next) => {
     if (!user) return res.status(401).send();
     const accessToken_payload = {
         sub: user._id,
-        exp: Date.now() + 28800000,
+        exp: Date.now() + 60000,
         username: user.username,
         admin: user.administrator
       };
