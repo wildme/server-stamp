@@ -66,13 +66,13 @@ exports.loginApi = (req, res, next) => {
       if (err)  return next(err);
       const accessToken_payload = {
         sub: user._id,
-        exp: Date.now() + 60000,
+        exp: Math.floor(Date.now() / 1000) + 600,
         username: user.username,
         admin: user.administrator
       };
       const refreshToken_payload = {
         sub: user._id,
-        exp: Date.now() + 28800000,
+        exp: Math.floor(Date.now() / 1000) + 28800,
         username: user.username,
         admin: user.administrator
       };
@@ -84,7 +84,7 @@ exports.loginApi = (req, res, next) => {
         let refreshToken = jwt.sign(refreshToken_payload, 'my_secret');
 
         return res.status(200)
-        .cookie('jwt', refreshToken, { httpOnly: true, maxAge: 2628000000 })
+        .cookie('jwt', refreshToken, { httpOnly: true, maxAge: 28800000 })
         .json({ user: profile, token: accessToken });
       }
 
@@ -100,7 +100,7 @@ exports.refreshTokenApi = (req, res, next) => {
     if (!user) return res.status(401).send();
     const accessToken_payload = {
         sub: user._id,
-        exp: Date.now() + 60000,
+        exp: Math.floor(Date.now() / 1000) + 600,
         username: user.username,
         admin: user.administrator
       };
