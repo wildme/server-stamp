@@ -61,7 +61,10 @@ exports.logoutApi = (req, res) => {
 exports.loginApi = (req, res, next) => {
   passport.authenticate('local', { session: false }, (err, user, info) => {
     if (err) return next(err);
-    if (!user) return res.status(401).json(info.message);
+    if (!user) {
+      console.log(info.message);
+      return res.status(401).send();
+    }
     req.logIn(user, (err) => {
       if (err)  return next(err);
       const accessToken_payload = {
