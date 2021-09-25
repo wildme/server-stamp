@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
@@ -10,8 +11,7 @@
     "multiparty": "^4.2.2",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
-    "passport-local": "^1.0.0",
-    "passport-local-mongoose": "^6.1.0"
+    "passport-local": "^1.0.0"
   },
   "name": "server-stamp",
   "description": "Server-side part of Stamp: Node.js, Express.js, MongoDB",
