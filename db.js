@@ -37,14 +37,17 @@ module.exports = {
   page === 'inbox' ?
   Inbox.find({}).sort([[field, order]]) :
   Outbox.find({}).sort([[field, order]]),
+
   getItemById: async (page, id) =>
     page === 'inbox' ?
   Inbox.find({id: id}) :
   Outbox.find({id: id}),
+
   updateItemById: async(id, page, subject, fromTo, notes) =>
   page === 'inbox' ?
   Inbox.updateOne({id: id}, {subject: subject, from: fromTo, notes: notes}) :
   Outbox.updateOne({id: id}, {subject: subject, to: fromTo, notes: notes}),
+
   addBox: async (page, subject, fromTo, addedBy, notes) => {
     await LastId.updateOne({box: page}, {$inc: {lastId: 1}});
     const id = await LastId.findOne({box: page}, 'lastId')
@@ -54,5 +57,12 @@ module.exports = {
       new Outbox({ id: id.lastId, to: fromTo, subject: subject,
       addedBy: addedBy, notes: notes });
     doc.save();
+  },
+
+  getUserByName: async (username) => User.findOne({username: username}, 'username email'),
+
+  signup: async (username, password, firstname, lastname, email) => {
+    new User({username: username, password: password,
+    firstname: firstname, lastname: lastname, email: email }).save();
   }
 };

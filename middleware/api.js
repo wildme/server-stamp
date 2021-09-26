@@ -26,3 +26,11 @@ exports.updateItemByIdApi = async (req, res) => {
   await db.updateItemById(id, page, req.body.subject,
     req.body.fromTo, req.body.notes);
 };
+
+exports.signupApi = async (req, res) => {
+  const profile = await db.getUserByName(req.body.username);
+  if (profile.username) res.send('Username is taken');
+  if (profile.email) res.send('There is an account with this email');
+  await db.signup(req.body.username, req.body.password, 
+    req.body.firstname, req.body.lastname, req.body.email);
+};
