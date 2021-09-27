@@ -59,7 +59,9 @@ module.exports = {
     doc.save();
   },
 
-  getUserByName: async (username) => User.findOne({username: username}, 'username email'),
+  checkUsername: async (username) => User.findOne({username: username}, 'username'),
+
+  checkEmail: async (email) => User.findOne({email: email}, 'email'),
 
   signup: async (username, password, firstname, lastname, email) => {
     new User({username: username, password: password,
