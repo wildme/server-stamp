@@ -28,9 +28,16 @@ exports.updateItemByIdApi = async (req, res) => {
 };
 
 exports.signupApi = async (req, res) => {
-  const profile = await db.getUserByName(req.body.username);
-  if (profile.username) res.send('Username is taken');
-  if (profile.email) res.send('There is an account with this email');
+  const username = await db.checkUsername(req.body.username);
+  const email = await db.checkEmail(req.body.email);
+
+  if (username) return res.status(409)
+    .json({error: 'Username is taken'});
+  if (email) return res.status(409)
+    .json({error: 'There is an account using this email'});
+
   await db.signup(req.body.username, req.body.password, 
     req.body.firstname, req.body.lastname, req.body.email);
+  res.status(201).send();
 };
+
