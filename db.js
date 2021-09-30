@@ -15,23 +15,6 @@ const Outbox = require('./models/outbox.js');
 const LastId = require('./models/lastId.js');
 const User = require('./models/user.js');
 
-LastId.find((err, ids) => {
-  if (err) return console.error(err);
-  if (ids.length) return;
-
-  new LastId({ box: 'inbox'}).save();
-  new LastId({ box: 'outbox'}).save();
-});
-
-User.find((err, user) => {
-  if (err) return console.error(err);
-  if (user.length) return;
-
-  new User({username: 'admin', password: 'admin',
-    firstname: 'John', lastname: 'Doe', email: 'admin@example.com',
-    administrator: true}).save();
-});
-
 module.exports = {
   getBox: async (page, field, order) =>
   page === 'inbox' ?
