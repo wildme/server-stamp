@@ -36,9 +36,9 @@ module.exports = {
     const id = await LastId.findOne({box: page}, 'lastId')
     const doc = page === 'inbox' ?
       new Inbox({ id: id.lastId, from: fromTo, subject: subject,
-        addedBy: addedBy, notes: notes }) :
+        addedBy: addedBy, notes: notes, date: new Date }) :
       new Outbox({ id: id.lastId, to: fromTo, subject: subject,
-      addedBy: addedBy, notes: notes });
+      addedBy: addedBy, notes: notes, date: new Date });
     doc.save();
   },
 
