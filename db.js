@@ -54,8 +54,10 @@ module.exports = {
 
   getContacts: async () => Contact.find({}),
 
-  searchContactsByName: async (name) =>
-  Contact.find({name: new RegExp('^'+name+'$', "i")}).exec(),
+  searchContactsByName: async (name) => {
+  const string  = new RegExp(name, "i");
+  return Contact.find({name: string}, 'name location').exec();
+  },
 
   addContact: async (location, region, name) => {
     new Contact({location: location, region: region, name: name}).save();
