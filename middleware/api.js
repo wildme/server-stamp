@@ -7,12 +7,13 @@ exports.getBoxApi = async (req, res) => {
   const box = await db.getBox(page, field, order);
   res.json(box);
 };
+
 exports.getItemByIdApi = async (req, res) => {
   const page = req.params.box;
   const id = req.params.id;
   const item = await db.getItemById(page, id);
   res.json(item);
-}
+};
 
 exports.addBoxApi = async (req, res) => {
   const page = req.params.box;
@@ -38,6 +39,21 @@ exports.signupApi = async (req, res) => {
 
   await db.signup(req.body.username, req.body.password, 
     req.body.firstname, req.body.lastname, req.body.email);
-  res.status(201).send();
+    res.status(201).send();
 };
 
+exports.getContactsApi = async (req, res) => {
+  const contacts = await db.getContacts();
+  if (contacts)  res.status(200).json(contacts);
+  else res.status(204).send();
+};
+
+exports.searchContactsByNameApi = async (req, res) => {
+  const name = req.query.name;
+  const contacts = await db.searchContactsByName(name);
+  res.json(contacts);
+};
+
+exports.addContactApi = async (req, res) => {
+  await db.addContact(req.body.orgLocation, req.body.orgRegion, req.body.orgName);
+};

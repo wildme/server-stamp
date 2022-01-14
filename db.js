@@ -14,6 +14,7 @@ const Inbox = require('./models/inbox.js');
 const Outbox = require('./models/outbox.js');
 const LastId = require('./models/lastId.js');
 const User = require('./models/user.js');
+const Contact = require('./models/contact.js');
 
 module.exports = {
   getBox: async (page, field, order) =>
@@ -49,5 +50,14 @@ module.exports = {
   signup: async (username, password, firstname, lastname, email) => {
     new User({username: username, password: password,
     firstname: firstname, lastname: lastname, email: email }).save();
+  },
+
+  getContacts: async () => Contact.find({}),
+
+  searchContactsByName: async (name) =>
+  Contact.find({name: new RegExp('^'+name+'$', "i")}).exec(),
+
+  addContact: async (location, region, name) => {
+    new Contact({location: location, region: region, name: name}).save();
   }
 };
