@@ -17,8 +17,8 @@ const User = require('./models/user.js');
 const admin = new User({ username: 'admin', password: 'admin',
       firstname: 'John', lastname: 'Doe', email: 'admin@example.com',
       administrator: true });
-const inboxLastId = new LastId({ box: 'inbox', lastId: 0 });
-const outboxLastId = new LastId({ box: 'outbox', lastId: 0 });
+const inboxLastId = new LastId({ box: 'inbox' });
+const outboxLastId = new LastId({ box: 'outbox' });
 
 (async function() {
   const adminUser = await User.exists({ username: 'admin' });
