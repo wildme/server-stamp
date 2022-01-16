@@ -1,11 +1,11 @@
 const db = require('../db.js');
 
-exports.getBoxApi = async (req, res) => {
+exports.getItemsApi = async (req, res) => {
   const page = req.params.box;
   const field = req.query.field || 'id';
   const order = req.query.order || 'asc';
-  const box = await db.getBox(page, field, order);
-  res.json(box);
+  const items = await db.getItems(page, field, order);
+  res.json(items);
 };
 
 exports.getItemByIdApi = async (req, res) => {
@@ -15,9 +15,9 @@ exports.getItemByIdApi = async (req, res) => {
   res.json(item);
 };
 
-exports.addBoxApi = async (req, res) => {
+exports.addItemApi = async (req, res) => {
   const page = req.params.box;
-  await db.addBox(page, req.body.subject,
+  await db.addItem(page, req.body.subject,
     req.body.fromTo, req.body.addedBy, req.body.notes);
 };
 
