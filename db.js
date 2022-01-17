@@ -27,12 +27,20 @@ module.exports = {
   await Inbox.find({id: id}) :
   await Outbox.find({id: id}),
 
-  updateItemById: async(id, page, subject, fromTo, replyTo, notes) =>
+  updateItemById: async (id, page, subject, fromTo, replyTo, notes) =>
   page === 'inbox' ?
   await Inbox.updateOne({id: id},
-    {subject: subject, from: fromTo, replyTo: replyTo, notes: notes}) :
+    {subject: subject, from: fromTo,
+      replyTo: replyTo, notes: notes, updated: new Date()}) :
   await Outbox.updateOne({id: id},
-    {subject: subject, to: fromTo, replyTo: replyTo, notes: notes}),
+    {subject: subject, to: fromTo,
+      replyTo: replyTo, notes: notes, updated: new Date()}),
+
+  updateStatus: async (box, id, status) => (
+    box === 'inbox' ?
+    await Inbox.updateOne({id: id}, {status: status}) :
+    await Outbox.updateOne({id: id}, {status: status})
+  ),
 
   addItem: async (page, subject, fromTo, addedBy, replyTo, notes) => {
     const year = new Date().getFullYear();
