@@ -37,6 +37,7 @@ app.post('/api/signup', api.signupApi);
 app.post('/api/contacts/new', api.addContactApi);
 app.post('/api/:box/new', api.addItemApi);
 app.post('/api/:box/update/:id', api.updateItemByIdApi);
+app.post('/api/:box/status/:id', api.updateStatusApi);
 
 app.listen(port, () => console.log(
   `Express is running at http://localhost:${port}`));

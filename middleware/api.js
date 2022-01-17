@@ -28,6 +28,13 @@ exports.updateItemByIdApi = async (req, res) => {
   await db.updateItemById(id, page, req.body.subject,
     req.body.fromTo, req.body.replyTo, req.body.notes);
 };
+exports.updateStatusApi = async (req, res) => {
+  const box = req.params.box;
+  const id = req.params.id
+  const status = req.body.newStatus;
+  await db.updateStatus(box, id, status);
+  res.status(200).send();
+};
 
 exports.signupApi = async (req, res) => {
   const username = await db.checkUsername(req.body.username);
