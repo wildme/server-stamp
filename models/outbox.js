@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const outboxSchema = mongoose.Schema({
-  id: { type: String },
-  status: { type: String, default: 'active' },
+  id: { type: String, unique: true },
+  status: { type: String, default: 'active', enum: ['active', 'canceled'] },
   to: { type: String },
   subject: { type: String },
   date: { type: Date },
