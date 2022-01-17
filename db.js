@@ -27,12 +27,14 @@ module.exports = {
   await Inbox.find({id: id}) :
   await Outbox.find({id: id}),
 
-  updateItemById: async(id, page, subject, fromTo, notes) =>
+  updateItemById: async(id, page, subject, fromTo, replyTo, notes) =>
   page === 'inbox' ?
-  Inbox.updateOne({id: id}, {subject: subject, from: fromTo, notes: notes}) :
-  Outbox.updateOne({id: id}, {subject: subject, to: fromTo, notes: notes}),
+  await Inbox.updateOne({id: id},
+    {subject: subject, from: fromTo, replyTo: replyTo, notes: notes}) :
+  await Outbox.updateOne({id: id},
+    {subject: subject, to: fromTo, replyTo: replyTo, notes: notes}),
 
-  addItem: async (page, subject, fromTo, addedBy, notes) => {
+  addItem: async (page, subject, fromTo, addedBy, replyTo, notes) => {
     const year = new Date().getFullYear();
     const docForCurrentYear = await LastId.findOne({box: page, year: year});
     if (!(docForCurrentYear)) new LastId({box: page, year: year}).save();
@@ -40,9 +42,9 @@ module.exports = {
     const id = await LastId.findOne({box: page, year: year}, 'lastId');
     const doc = page === 'inbox' ?
       new Inbox({ id: [id.lastId, year].join('-'), from: fromTo, subject: subject,
-        addedBy: addedBy, notes: notes, date: new Date }) :
+        addedBy: addedBy, replyTo: replyTo, notes: notes, date: new Date }) :
       new Outbox({ id: [id.lastId, year].join('-'), to: fromTo, subject: subject,
-      addedBy: addedBy, notes: notes, date: new Date });
+      addedBy: addedBy, replyTo: replyTo, notes: notes, date: new Date });
     await doc.save();
   },
 

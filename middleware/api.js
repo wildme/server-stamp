@@ -18,14 +18,15 @@ exports.getItemByIdApi = async (req, res) => {
 exports.addItemApi = async (req, res) => {
   const page = req.params.box;
   await db.addItem(page, req.body.subject,
-    req.body.fromTo, req.body.addedBy, req.body.notes);
+    req.body.fromTo, req.body.addedBy,
+    req.body.replyTo, req.body.notes);
 };
 
 exports.updateItemByIdApi = async (req, res) => {
   const page = req.params.box;
   const id = req.params.id;
   await db.updateItemById(id, page, req.body.subject,
-    req.body.fromTo, req.body.notes);
+    req.body.fromTo, req.body.replyTo, req.body.notes);
 };
 
 exports.signupApi = async (req, res) => {
