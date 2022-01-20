@@ -65,3 +65,7 @@ exports.searchContactsByNameApi = async (req, res) => {
 exports.addContactApi = async (req, res) => {
   await db.addContact(req.body.orgLocation, req.body.orgRegion, req.body.orgName);
 };
+
+exports.uploadFileApi = async (req, res) => {
+  res.status(200).send();
+};
