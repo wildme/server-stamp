@@ -17,9 +17,10 @@ exports.getItemByIdApi = async (req, res) => {
 
 exports.addItemApi = async (req, res) => {
   const page = req.params.box;
-  await db.addItem(page, req.body.subject,
+  const id = await db.addItem(page, req.body.subject,
     req.body.fromTo, req.body.addedBy,
-    req.body.replyTo, req.body.notes);
+    req.body.replyTo, req.body.note);
+  res.status(200).json(id);
 };
 
 exports.updateItemByIdApi = async (req, res) => {
@@ -67,5 +68,8 @@ exports.addContactApi = async (req, res) => {
 };
 
 exports.uploadFileApi = async (req, res) => {
+  const file = req.body.formData;
+  const box = req.params.box;
+  const id = req.params.id;
   res.status(200).send();
 };
