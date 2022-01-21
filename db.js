@@ -48,12 +48,14 @@ module.exports = {
     if (!(docForCurrentYear)) new LastId({box: page, year: year}).save();
     await LastId.updateOne({box: page, year: year}, {$inc: {lastId: 1}});
     const id = await LastId.findOne({box: page, year: year}, 'lastId');
+    const idYearFormat = [id.lastId, year].join('-'); 
     const doc = page === 'inbox' ?
-      new Inbox({ id: [id.lastId, year].join('-'), from: fromTo, subject: subject,
+      new Inbox({ id: idYearFormat, from: fromTo, subject: subject,
         addedBy: addedBy, replyTo: replyTo, notes: notes, date: new Date }) :
-      new Outbox({ id: [id.lastId, year].join('-'), to: fromTo, subject: subject,
+      new Outbox({ id: idYearFormat, to: fromTo, subject: subject,
       addedBy: addedBy, replyTo: replyTo, notes: notes, date: new Date });
     await doc.save();
+    return idYearFormat;
   },
 
   checkUsername: async (username) => await User.findOne({username: username}, 'username'),
