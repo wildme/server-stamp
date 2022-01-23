@@ -15,6 +15,14 @@ exports.getItemByIdApi = async (req, res) => {
   res.json(item);
 };
 
+exports.getAttachmentByIdApi = async (req, res) => {
+  const box = req.params.box;
+  const id = req.params.id;
+  const attachment = await db.getAttachmentById(box, id);
+  if (attachment) return res.status(200).json(attachment);
+  else return res.status(204).send();
+};
+
 exports.addItemApi = async (req, res) => {
   const page = req.params.box;
   const id = await db.addItem(page, req.body.subject,
@@ -68,8 +76,20 @@ exports.addContactApi = async (req, res) => {
 };
 
 exports.uploadFileApi = async (req, res) => {
-  const file = req.body.formData;
+  const filename = req.file.originalname;
+  const fsDirectory = req.file.destination;
+  const fsFilename = req.file.filename;
+  const size = req.file.size;
+  const type = req.file.mimetype;
   const box = req.params.box;
   const id = req.params.id;
+  await db.addAttachment(filename, fsDirectory, fsFilename, box, id, size, type);
   res.status(200).send();
+};
+
+exports.downloadFileApi = async (req, res) => {
+  const fsFilename = req.params.file;
+  const { fsDirectory, filename, mimeType } = await db.getAttachmentByFilename(fsFilename);
+  const path = [fsDirectory, fsFilename].join('/');
+  res.set({'Content-Type': mimeType}).status(200).download(path, filename);
 };
