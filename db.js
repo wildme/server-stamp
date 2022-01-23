@@ -15,6 +15,7 @@ const Outbox = require('./models/outbox.js');
 const LastId = require('./models/lastId.js');
 const User = require('./models/user.js');
 const Contact = require('./models/contact.js');
+const Attachment = require('./models/attachment.js');
 
 module.exports = {
   getItems: async (page, field, order) =>
@@ -26,6 +27,16 @@ module.exports = {
     page === 'inbox' ?
   await Inbox.find({id: id}) :
   await Outbox.find({id: id}),
+
+  getAttachmentById: async (box, id) => {
+    return await Attachment.findOne({ doc: box, docId: id },
+      'fsFilename filename').exec();
+  },
+
+  getAttachmentByFilename: async (fsFilename) => {
+    return await Attachment.findOne({ fsFilename: fsFilename },
+      'fsDirectory filename mimeType').exec();
+  },
 
   updateItemById: async (id, page, subject, fromTo, replyTo, notes) =>
   page === 'inbox' ?
@@ -56,6 +67,13 @@ module.exports = {
       addedBy: addedBy, replyTo: replyTo, notes: notes, date: new Date });
     await doc.save();
     return idYearFormat;
+  },
+
+  addAttachment: async (filename, fsDirectory, fsFilename, box, id, size, type) => {
+    const doc = new Attachment({ filename: filename, fsDirectory: fsDirectory,
+      fsFilename: fsFilename, doc: box, docId: id, filesize: size,
+      date: new Date, mimeType: type });
+    await doc.save();
   },
 
   checkUsername: async (username) => await User.findOne({username: username}, 'username'),
