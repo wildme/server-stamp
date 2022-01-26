@@ -1,4 +1,5 @@
 const db = require('../db.js');
+const fs = require('fs');
 
 exports.getItemsApi = async (req, res) => {
   const page = req.params.box;
@@ -19,10 +20,20 @@ exports.getAttachmentByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
   const attachment = await db.getAttachmentById(box, id);
+
   if (attachment) return res.status(200).json(attachment);
   else return res.status(204).send();
 };
 
+exports.deleteAttachmentByIdApi = async (req, res) => {
+  const id = req.params.id;
+  const { fsDirectory, fsFilename } = await db.getAttachmentByFileId(id);
+
+  await db.deleteAttachmentById(id);
+  console.log(`${fsDirectory}/${fsFilename}`);
+  //fs.unlink(`${fsDirectory}/${fsFilename}`)
+  res.status(200).send();
+};
 exports.addItemApi = async (req, res) => {
   const page = req.params.box;
   const id = await db.addItem(page, req.body.subject,
@@ -35,7 +46,7 @@ exports.updateItemByIdApi = async (req, res) => {
   const page = req.params.box;
   const id = req.params.id;
   await db.updateItemById(id, page, req.body.subject,
-    req.body.fromTo, req.body.replyTo, req.body.notes);
+    req.body.fromTo, req.body.replyTo, req.body.note);
 };
 exports.updateStatusApi = async (req, res) => {
   const box = req.params.box;
@@ -88,8 +99,8 @@ exports.uploadFileApi = async (req, res) => {
 };
 
 exports.downloadFileApi = async (req, res) => {
-  const fsFilename = req.params.file;
-  const { fsDirectory, filename, mimeType } = await db.getAttachmentByFilename(fsFilename);
+  const id = req.params.file;
+  const { fsDirectory, fsFilename, filename, mimeType } = await db.getAttachmentByFileId(id);
   const path = [fsDirectory, fsFilename].join('/');
   res.set({'Content-Type': mimeType}).status(200).download(path, filename);
 };
