@@ -9,7 +9,7 @@ const inboxSchema = mongoose.Schema({
   updated: { type: Date },
   addedBy: { type: String },
   replyTo: { type: String },
-  notes: { type: String }
+  note: { type: String }
 });
 
 const Inbox = mongoose.model('Inbox', inboxSchema);

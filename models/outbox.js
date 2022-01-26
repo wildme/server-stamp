@@ -9,7 +9,7 @@ const outboxSchema = mongoose.Schema({
   updated: { type: Date },
   addedBy:  { type: String },
   replyTo: { type: String },
-  notes:  { type: String },
+  note:  { type: String },
 });
 
 const Outbox = mongoose.model('Outbox', outboxSchema);
