@@ -8,7 +8,7 @@ const multer = require('multer');
 const upload = multer({ dest: 'files/'
   + new Date().getFullYear()
   + '/' + new Date().getMonth(),
-  limits: { fileSize: 5120 }
+  limits: { fileSize: 5000000 }
 });
 
 const api = require('./middleware/api.js');
@@ -37,6 +37,7 @@ app.get('/api/token', auth.refreshTokenApi);
 app.get('/api/contacts', api.getContactsApi);
 app.get('/api/contacts/search/by-name', api.searchContactsByNameApi);
 app.get('/api/download/:file', api.downloadFileApi);
+app.get('/api/delete/:id', api.deleteAttachmentByIdApi);
 app.get('/api/:box', api.getItemsApi);
 app.get('/api/:box/:id', api.getItemByIdApi);
 app.get('/api/attachment/:box/:id', api.getAttachmentByIdApi);
