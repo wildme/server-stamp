@@ -30,22 +30,26 @@ module.exports = {
 
   getAttachmentById: async (box, id) => {
     return await Attachment.findOne({ doc: box, docId: id },
-      'fsFilename filename').exec();
+      'filename _id').exec();
   },
 
-  getAttachmentByFilename: async (fsFilename) => {
-    return await Attachment.findOne({ fsFilename: fsFilename },
-      'fsDirectory filename mimeType').exec();
+  deleteAttachmentById: async (id) => {
+    await Attachment.deleteOne({ _id: id });
   },
 
-  updateItemById: async (id, page, subject, fromTo, replyTo, notes) =>
+  getAttachmentByFileId: async (id) => {
+    return await Attachment.findOne({ _id: id },
+      'fsDirectory fsFilename filename mimeType').exec();
+  },
+
+  updateItemById: async (id, page, subject, fromTo, replyTo, note) =>
   page === 'inbox' ?
   await Inbox.updateOne({id: id},
     {subject: subject, from: fromTo,
-      replyTo: replyTo, notes: notes, updated: new Date()}) :
+      replyTo: replyTo, note: note, updated: new Date()}) :
   await Outbox.updateOne({id: id},
     {subject: subject, to: fromTo,
-      replyTo: replyTo, notes: notes, updated: new Date()}),
+      replyTo: replyTo, note: note, updated: new Date()}),
 
   updateStatus: async (box, id, status) => (
     box === 'inbox' ?
@@ -53,7 +57,7 @@ module.exports = {
     await Outbox.updateOne({id: id}, {status: status})
   ),
 
-  addItem: async (page, subject, fromTo, addedBy, replyTo, notes) => {
+  addItem: async (page, subject, fromTo, addedBy, replyTo, note) => {
     const year = new Date().getFullYear();
     const docForCurrentYear = await LastId.findOne({box: page, year: year});
     if (!(docForCurrentYear)) new LastId({box: page, year: year}).save();
@@ -62,9 +66,9 @@ module.exports = {
     const idYearFormat = [id.lastId, year].join('-'); 
     const doc = page === 'inbox' ?
       new Inbox({ id: idYearFormat, from: fromTo, subject: subject,
-        addedBy: addedBy, replyTo: replyTo, notes: notes, date: new Date }) :
+        addedBy: addedBy, replyTo: replyTo, note: note, date: new Date }) :
       new Outbox({ id: idYearFormat, to: fromTo, subject: subject,
-      addedBy: addedBy, replyTo: replyTo, notes: notes, date: new Date });
+      addedBy: addedBy, replyTo: replyTo, note: note, date: new Date });
     await doc.save();
     return idYearFormat;
   },
