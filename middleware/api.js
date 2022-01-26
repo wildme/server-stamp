@@ -30,8 +30,14 @@ exports.deleteAttachmentByIdApi = async (req, res) => {
   const { fsDirectory, fsFilename } = await db.getAttachmentByFileId(id);
 
   await db.deleteAttachmentById(id);
-  console.log(`${fsDirectory}/${fsFilename}`);
-  //fs.unlink(`${fsDirectory}/${fsFilename}`)
+  fs.unlink(`${fsDirectory}/${fsFilename}`, (err => {
+    if (err) {
+      console.log(err);
+      return;
+    } else {
+      console.log('Deleted file: ', fsFilename);
+    }
+  }));
   res.status(200).send();
 };
 exports.addItemApi = async (req, res) => {
