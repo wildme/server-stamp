@@ -6,23 +6,30 @@ exports.getItemsApi = async (req, res) => {
   const field = req.query.field || 'id';
   const order = req.query.order || 'asc';
   const items = await db.getItems(page, field, order);
-  res.json(items);
+  if (items.length) res.status(200).json(items);
+  else res.status(204).send();
 };
 
 exports.getItemByIdApi = async (req, res) => {
   const page = req.params.box;
   const id = req.params.id;
   const item = await db.getItemById(page, id);
-  res.json(item);
+  if (item.length) res.status(200).json(item);
+  else res.status(204).send();
 };
 
 exports.getAttachmentByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
   const attachment = await db.getAttachmentById(box, id);
-
   if (attachment) return res.status(200).json(attachment);
   else return res.status(204).send();
+};
+exports.getUserByNameApi = async (req, res) => {
+  const user = req.params.user;
+  const profile = await db.getUserByName(user);
+  if (profile) return res.status(200).json(profile);
+  else res.status(204).send();
 };
 
 exports.deleteAttachmentByIdApi = async (req, res) => {

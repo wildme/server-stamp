@@ -33,6 +33,10 @@ module.exports = {
       'filename _id').exec();
   },
 
+  getUserByName: async (user) => {
+    return await User.findOne({ username: user }).exec();
+  },
+
   deleteAttachmentById: async (id) => {
     await Attachment.deleteOne({ _id: id });
   },

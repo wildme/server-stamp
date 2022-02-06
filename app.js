@@ -38,6 +38,7 @@ app.get('/api/contacts', api.getContactsApi);
 app.get('/api/contacts/search/by-name', api.searchContactsByNameApi);
 app.get('/api/download/:file', api.downloadFileApi);
 app.get('/api/delete/:id', api.deleteAttachmentByIdApi);
+app.get('/api/user/:user', api.getUserByNameApi);
 app.get('/api/:box', api.getItemsApi);
 app.get('/api/:box/:id', api.getItemByIdApi);
 app.get('/api/attachment/:box/:id', api.getAttachmentByIdApi);
