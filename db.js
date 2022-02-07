@@ -34,7 +34,7 @@ module.exports = {
   },
 
   getUserByName: async (user) => {
-    return await User.findOne({ username: user }).exec();
+    return await User.findOne({ username: user }, 'firstname lastname email').exec();
   },
 
   deleteAttachmentById: async (id) => {
