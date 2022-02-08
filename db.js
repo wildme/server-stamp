@@ -61,6 +61,19 @@ module.exports = {
     await Outbox.updateOne({id: id}, {status: status})
   ),
 
+  updateUserEmail: async (user, email) => {
+    return await User.updateOne({username: user}, {email: email});
+  },
+
+  updateUserInfo: async (user, firstname, lastname) => {
+    return await User.updateOne({username: user}, {firstname: firstname,
+      lastname: lastname});
+  },
+
+  updateUserPassword: async (user, newPassword) => {
+    return await User.updateOne({username: user}, {password: newPassword});
+  },
+
   addItem: async (page, subject, fromTo, addedBy, replyTo, note) => {
     const year = new Date().getFullYear();
     const docForCurrentYear = await LastId.findOne({box: page, year: year});

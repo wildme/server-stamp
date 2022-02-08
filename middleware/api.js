@@ -25,6 +25,7 @@ exports.getAttachmentByIdApi = async (req, res) => {
   if (attachment) return res.status(200).json(attachment);
   else return res.status(204).send();
 };
+
 exports.getUserByNameApi = async (req, res) => {
   const user = req.params.user;
   const profile = await db.getUserByName(user);
@@ -47,6 +48,7 @@ exports.deleteAttachmentByIdApi = async (req, res) => {
   }));
   res.status(200).send();
 };
+
 exports.addItemApi = async (req, res) => {
   const page = req.params.box;
   const id = await db.addItem(page, req.body.subject,
@@ -66,7 +68,37 @@ exports.updateStatusApi = async (req, res) => {
   const id = req.params.id
   const status = req.body.newStatus;
   await db.updateStatus(box, id, status);
-  res.status(200).send();
+  return res.status(200).send();
+};
+
+exports.updateUserEmailApi = async (req, res) => {
+  const user = req.body.user;
+  const email = req.body.email;
+  const emailExists = await db.checkEmail(email);
+
+  if (emailExists) return res.status(409).send();
+
+  await db.updateUserEmail(user, email);
+  return res.status(200).send();
+};
+
+exports.updateUserInfoApi = async (req, res) => {
+  const user = req.body.user;
+  const firstname = req.body.firstname;
+  const lastname = req.body.lastname;
+
+  await db.updateUserInfo(user, firstname, lastname);
+  return res.status(200).send();
+};
+
+exports.updateUserPasswordApi = async (req, res) => {
+  const user = req.body.username;
+  const oldPass = req.body.oldPass;
+  const newPass = req.body.newPass;
+
+  await db.updateUserPassword(user, newPass);
+  
+  return res.status(200).send();
 };
 
 exports.signupApi = async (req, res) => {
@@ -80,23 +112,28 @@ exports.signupApi = async (req, res) => {
 
   await db.signup(req.body.username, req.body.password, 
     req.body.firstname, req.body.lastname, req.body.email);
-    res.status(201).send();
+
+    return res.status(201).send();
 };
 
 exports.getContactsApi = async (req, res) => {
   const contacts = await db.getContacts();
-  if (contacts)  res.status(200).json(contacts);
-  else res.status(204).send();
+
+  if (contacts)  return res.status(200).json(contacts);
+  else return res.status(204).send();
 };
 
 exports.searchContactsByNameApi = async (req, res) => {
   const name = req.query.name;
   const contacts = await db.searchContactsByName(name);
-  res.json(contacts);
+
+  return res.json(contacts);
 };
 
 exports.addContactApi = async (req, res) => {
   await db.addContact(req.body.orgLocation, req.body.orgRegion, req.body.orgName);
+
+  return res.status(200).send();
 };
 
 exports.uploadFileApi = async (req, res) => {
@@ -108,12 +145,14 @@ exports.uploadFileApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
   await db.addAttachment(filename, fsDirectory, fsFilename, box, id, size, type);
-  res.status(200).send();
+
+  return res.status(200).send();
 };
 
 exports.downloadFileApi = async (req, res) => {
   const id = req.params.file;
   const { fsDirectory, fsFilename, filename, mimeType } = await db.getAttachmentByFileId(id);
   const path = [fsDirectory, fsFilename].join('/');
-  res.set({'Content-Type': mimeType}).status(200).download(path, filename);
+
+  return res.set({'Content-Type': mimeType}).status(200).download(path, filename);
 };
