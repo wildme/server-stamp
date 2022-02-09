@@ -70,8 +70,8 @@ module.exports = {
       lastname: lastname});
   },
 
-  updateUserPassword: async (user, newPassword) => {
-    return await User.updateOne({username: user}, {password: newPassword});
+  updateUserPassword: async (user, hash) => {
+    return await User.updateOne({username: user}, {password: hash});
   },
 
   addItem: async (page, subject, fromTo, addedBy, replyTo, note) => {
@@ -97,9 +97,17 @@ module.exports = {
     await doc.save();
   },
 
-  checkUsername: async (username) => await User.findOne({username: username}, 'username'),
+  checkUsername: async (username) => {
+    return await User.findOne({username: username}, 'username');
+  },
 
-  checkEmail: async (email) => await User.findOne({email: email}, 'email'),
+  checkEmail: async (email) => {
+    return await User.findOne({email: email}, 'email');
+  },
+
+  checkPass: async (user, password) => {
+    return await User.findOne({username: user}, 'password');
+  },
 
   signup: async (username, password, firstname, lastname, email) => {
     new User({username: username, password: password,
