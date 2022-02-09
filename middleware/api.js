@@ -1,5 +1,6 @@
 const db = require('../db.js');
 const fs = require('fs');
+const bcrypt = require('bcrypt');
 
 exports.getItemsApi = async (req, res) => {
   const page = req.params.box;
@@ -92,13 +93,24 @@ exports.updateUserInfoApi = async (req, res) => {
 };
 
 exports.updateUserPasswordApi = async (req, res) => {
-  const user = req.body.username;
+  const user = req.body.user;
   const oldPass = req.body.oldPass;
   const newPass = req.body.newPass;
 
-  await db.updateUserPassword(user, newPass);
-  
-  return res.status(200).send();
+  const { password } = await db.checkPass(user, oldPass);
+  const checkPass = bcrypt.compareSync(oldPass, password);
+
+  if (checkPass) {
+    const saltRounds = 10;
+    bcrypt.hash(newPass, saltRounds)
+      .then(hash => {
+        db.updateUserPassword(user, hash);
+      })
+      .catch((e) => console.error(e))
+      res.status(200).send();
+  } else {
+    return res.send(409).send();
+  }
 };
 
 exports.signupApi = async (req, res) => {
