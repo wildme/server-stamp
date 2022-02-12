@@ -122,10 +122,12 @@ exports.signupApi = async (req, res) => {
   if (email) return res.status(409)
     .json({error: 'There is an account using this email'});
 
-  await db.signup(req.body.username, req.body.password, 
+  const user = await db.signup(req.body.username, req.body.password,
     req.body.firstname, req.body.lastname, req.body.email);
 
-    return res.status(201).send();
+  if (!user) return res.status(500).send();
+
+  return res.status(201).send();
 };
 
 exports.getContactsApi = async (req, res) => {
