@@ -110,8 +110,15 @@ module.exports = {
   },
 
   signup: async (username, password, firstname, lastname, email) => {
-    new User({username: username, password: password,
-    firstname: firstname, lastname: lastname, email: email }).save();
+    const user = new User({username: username, password: password,
+    firstname: firstname, lastname: lastname, email: email });
+
+    return await user.save()
+      .then(user => user)
+      .catch(err => {
+        console.error(err);
+        return null;
+      })
   },
 
   getContacts: async () => Contact.find({}),
