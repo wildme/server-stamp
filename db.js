@@ -4,10 +4,12 @@ const connectionString = process.env.MONGO_SRV || 'mongodb://localhost:27017/tes
 mongoose.connect(connectionString, {useNewUrlParser: true, useUnifiedTopology: true});
 
 const db = mongoose.connection;
+
 db.on('error', err => {
   console.error(err.message);
   process.exit(1);
 });
+
 db.once('open', () => console.log('Connection established'));
 
 const Inbox = require('./models/inbox.js');
@@ -18,15 +20,17 @@ const Contact = require('./models/contact.js');
 const Attachment = require('./models/attachment.js');
 
 module.exports = {
-  getItems: async (page, field, order) =>
-  page === 'inbox' ?
-  await Inbox.find({}).sort([[field, order]]) :
-  await Outbox.find({}).sort([[field, order]]),
+  getItems: async (page, field, order) => {
+    return page === 'inbox' ?
+      await Inbox.find({}).sort([[field, order]]) :
+      await Outbox.find({}).sort([[field, order]])
+  },
 
-  getItemById: async (page, id) =>
-    page === 'inbox' ?
-  await Inbox.find({id: id}) :
-  await Outbox.find({id: id}),
+  getItemById: async (page, id) => {
+    return page === 'inbox' ?
+      await Inbox.find({id: id}) :
+      await Outbox.find({id: id})
+  },
 
   getAttachmentById: async (box, id) => {
     return await Attachment.findOne({ doc: box, docId: id },
@@ -77,15 +81,19 @@ module.exports = {
   addItem: async (page, subject, fromTo, addedBy, replyTo, note) => {
     const year = new Date().getFullYear();
     const docForCurrentYear = await LastId.findOne({box: page, year: year});
+
     if (!(docForCurrentYear)) new LastId({box: page, year: year}).save();
+
     await LastId.updateOne({box: page, year: year}, {$inc: {lastId: 1}});
     const id = await LastId.findOne({box: page, year: year}, 'lastId');
     const idYearFormat = [id.lastId, year].join('-'); 
+
     const doc = page === 'inbox' ?
       new Inbox({ id: idYearFormat, from: fromTo, subject: subject,
         addedBy: addedBy, replyTo: replyTo, note: note, date: new Date }) :
       new Outbox({ id: idYearFormat, to: fromTo, subject: subject,
       addedBy: addedBy, replyTo: replyTo, note: note, date: new Date });
+
     await doc.save();
     return idYearFormat;
   },
@@ -121,14 +129,15 @@ module.exports = {
       })
   },
 
-  getContacts: async () => Contact.find({}),
+  getContacts: async () => { return Contact.find({}) },
 
   searchContactsByName: async (name) => {
-  const string  = new RegExp(name, "i");
-  return await Contact.find({name: string}, 'name location').exec();
+    const string  = new RegExp(name, "i");
+    return await Contact.find({name: string}, 'name location').exec();
   },
 
   addContact: async (location, region, name) => {
-    new Contact({location: location, region: region, name: name}).save();
+    const doc = new Contact({location: location, region: region, name: name});
+    await doc.save();
   }
 };
