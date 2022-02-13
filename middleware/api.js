@@ -7,16 +7,18 @@ exports.getItemsApi = async (req, res) => {
   const field = req.query.field || 'id';
   const order = req.query.order || 'asc';
   const items = await db.getItems(page, field, order);
-  if (items.length) res.status(200).json(items);
-  else res.status(204).send();
+
+  if (items.length) return res.status(200).json(items);
+  else return res.status(204).send();
 };
 
 exports.getItemByIdApi = async (req, res) => {
   const page = req.params.box;
   const id = req.params.id;
   const item = await db.getItemById(page, id);
-  if (item.length) res.status(200).json(item);
-  else res.status(204).send();
+
+  if (item.length) return res.status(200).json(item);
+  else return res.status(204).send();
 };
 
 exports.getAttachmentByIdApi = async (req, res) => {
@@ -31,7 +33,7 @@ exports.getUserByNameApi = async (req, res) => {
   const user = req.params.user;
   const profile = await db.getUserByName(user);
   if (profile) return res.status(200).json(profile);
-  else res.status(204).send();
+  else return res.status(204).send();
 };
 
 exports.deleteAttachmentByIdApi = async (req, res) => {
@@ -42,12 +44,12 @@ exports.deleteAttachmentByIdApi = async (req, res) => {
   fs.unlink(`${fsDirectory}/${fsFilename}`, (err => {
     if (err) {
       console.log(err);
-      return;
+      return null;
     } else {
       console.log('Deleted file: ', fsFilename);
     }
   }));
-  res.status(200).send();
+  return res.status(200).send();
 };
 
 exports.addItemApi = async (req, res) => {
@@ -55,7 +57,8 @@ exports.addItemApi = async (req, res) => {
   const id = await db.addItem(page, req.body.subject,
     req.body.fromTo, req.body.addedBy,
     req.body.replyTo, req.body.note);
-  res.status(200).json(id);
+
+  return res.status(200).json(id);
 };
 
 exports.updateItemByIdApi = async (req, res) => {
@@ -63,12 +66,16 @@ exports.updateItemByIdApi = async (req, res) => {
   const id = req.params.id;
   await db.updateItemById(id, page, req.body.subject,
     req.body.fromTo, req.body.replyTo, req.body.note);
+
+  return res.status(200).send();
 };
+
 exports.updateStatusApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id
   const status = req.body.newStatus;
   await db.updateStatus(box, id, status);
+
   return res.status(200).send();
 };
 
@@ -80,6 +87,7 @@ exports.updateUserEmailApi = async (req, res) => {
   if (emailExists) return res.status(409).send();
 
   await db.updateUserEmail(user, email);
+
   return res.status(200).send();
 };
 
@@ -89,6 +97,7 @@ exports.updateUserInfoApi = async (req, res) => {
   const lastname = req.body.lastname;
 
   await db.updateUserInfo(user, firstname, lastname);
+
   return res.status(200).send();
 };
 
@@ -133,7 +142,7 @@ exports.signupApi = async (req, res) => {
 exports.getContactsApi = async (req, res) => {
   const contacts = await db.getContacts();
 
-  if (contacts)  return res.status(200).json(contacts);
+  if (contacts) return res.status(200).json(contacts);
   else return res.status(204).send();
 };
 
