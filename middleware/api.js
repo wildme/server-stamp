@@ -3,19 +3,19 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 
 exports.getItemsApi = async (req, res) => {
-  const page = req.params.box;
-  const field = req.query.field || 'id';
+  const box = req.params.box;
+  const column = req.query.field || 'id';
   const order = req.query.order || 'asc';
-  const items = await db.getItems(page, field, order);
+  const items = await db.getItems(box, column, order);
 
   if (items.length) return res.status(200).json(items);
   else return res.status(204).send();
 };
 
 exports.getItemByIdApi = async (req, res) => {
-  const page = req.params.box;
+  const box = req.params.box;
   const id = req.params.id;
-  const item = await db.getItemById(page, id);
+  const item = await db.getItemById(box, id);
 
   if (item.length) return res.status(200).json(item);
   else return res.status(204).send();
@@ -53,19 +53,23 @@ exports.deleteAttachmentByIdApi = async (req, res) => {
 };
 
 exports.addItemApi = async (req, res) => {
-  const page = req.params.box;
-  const id = await db.addItem(page, req.body.subject,
+  const box = req.params.box;
+  const id = await db.addItem(box, req.body.subject,
     req.body.fromTo, req.body.addedBy,
     req.body.replyTo, req.body.note);
+
+  if (!id) return res.status(500).send();
 
   return res.status(200).json(id);
 };
 
 exports.updateItemByIdApi = async (req, res) => {
-  const page = req.params.box;
+  const box = req.params.box;
   const id = req.params.id;
-  await db.updateItemById(id, page, req.body.subject,
+  const item = await db.updateItemById(id, box, req.body.subject,
     req.body.fromTo, req.body.replyTo, req.body.note);
+
+  if (!item) return res.status(500).send();
 
   return res.status(200).send();
 };
@@ -74,7 +78,9 @@ exports.updateStatusApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id
   const status = req.body.newStatus;
-  await db.updateStatus(box, id, status);
+  const itemStatus = await db.updateStatus(box, id, status);
+
+  if (!itemStatus) return res.status(500).send();
 
   return res.status(200).send();
 };
@@ -86,7 +92,9 @@ exports.updateUserEmailApi = async (req, res) => {
 
   if (emailExists) return res.status(409).send();
 
-  await db.updateUserEmail(user, email);
+  const emailUpdate = await db.updateUserEmail(user, email);
+
+  if (!emailUpdate) return res.status(500).send();
 
   return res.status(200).send();
 };
@@ -96,7 +104,8 @@ exports.updateUserInfoApi = async (req, res) => {
   const firstname = req.body.firstname;
   const lastname = req.body.lastname;
 
-  await db.updateUserInfo(user, firstname, lastname);
+  const info = await db.updateUserInfo(user, firstname, lastname);
+  if (!info) return res.status(500).send();
 
   return res.status(200).send();
 };
@@ -113,9 +122,13 @@ exports.updateUserPasswordApi = async (req, res) => {
     const saltRounds = 10;
     bcrypt.hash(newPass, saltRounds)
       .then(hash => {
-        db.updateUserPassword(user, hash);
+        const pass = db.updateUserPassword(user, hash);
+        if (!pass) throw new Error("Password wasn't updated");
       })
-      .catch((e) => console.error(e))
+      .catch((e) => {
+        console.error(e)
+        return res.status(500).send();
+      });
       res.status(200).send();
   } else {
     return res.send(409).send();
@@ -154,7 +167,10 @@ exports.searchContactsByNameApi = async (req, res) => {
 };
 
 exports.addContactApi = async (req, res) => {
-  await db.addContact(req.body.orgLocation, req.body.orgRegion, req.body.orgName);
+  const contact = await db.addContact(req.body.orgLocation,
+    req.body.orgRegion, req.body.orgName);
+
+  if (!contact) return res.status(500).send();
 
   return res.status(200).send();
 };
