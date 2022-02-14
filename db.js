@@ -22,19 +22,39 @@ const Attachment = require('./models/attachment.js');
 module.exports = {
   getItems: async (box, column, order) => {
     if (box === 'inbox') {
-      return await Inbox.find({}).sort([[column, order]]);
+      return await Inbox.find({}).sort([[column, order]])
+        .then(items => items)
+        .catch((err) => {
+          console.error(err);
+          return null;
+        });
     }
     if (box === 'outbox') {
-      return await Outbox.find({}).sort([[column, order]]);
+      return await Outbox.find({}).sort([[column, order]])
+        .then(items => items)
+        .catch((err) => {
+          console.error(err);
+          return null;
+        });
     }
   },
 
   getItemById: async (box, id) => {
     if (box === 'inbox') {
-      return  await Inbox.find({ id: id }).exec();
+      return await Inbox.find({ id: id }).exec()
+        .then(item => item)
+        .catch((err) => {
+          console.error(err);
+          return null;
+        });
     }
     if (box === 'outbox') {
-      return await Outbox.find({ id: id }).exec();
+      return await Outbox.find({ id: id }).exec()
+        .then(item => item)
+        .catch((err) => {
+          console.error(err);
+          return null;
+        });
     }
   },
 
