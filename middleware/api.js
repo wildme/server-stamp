@@ -8,8 +8,9 @@ exports.getItemsApi = async (req, res) => {
   const order = req.query.order || 'asc';
   const items = await db.getItems(box, column, order);
 
+  if (!items) return res.status(500).send();
   if (items.length) return res.status(200).json(items);
-  else return res.status(204).send();
+  if (!items.length) return res.status(204).send();
 };
 
 exports.getItemByIdApi = async (req, res) => {
@@ -17,8 +18,8 @@ exports.getItemByIdApi = async (req, res) => {
   const id = req.params.id;
   const item = await db.getItemById(box, id);
 
-  if (item.length) return res.status(200).json(item);
-  else return res.status(204).send();
+  if (!item) return res.status(500).send();
+  return res.status(200).json(item);
 };
 
 exports.getAttachmentByIdApi = async (req, res) => {
