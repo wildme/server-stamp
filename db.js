@@ -77,7 +77,7 @@ module.exports = {
   },
 
   getContacts: async () => {
-    return Contact.find({})
+    return Contact.find({}).sort('name')
       .then(contacts => contacts)
       .catch((err) => {
         console.error(err);
