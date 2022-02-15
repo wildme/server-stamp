@@ -40,16 +40,18 @@ exports.getUserByNameApi = async (req, res) => {
 exports.deleteAttachmentByIdApi = async (req, res) => {
   const id = req.params.id;
   const { fsDirectory, fsFilename } = await db.getAttachmentByFileId(id);
+  const file = await db.deleteAttachmentById(id);
 
-  await db.deleteAttachmentById(id);
   fs.unlink(`${fsDirectory}/${fsFilename}`, (err => {
     if (err) {
       console.log(err);
-      return null;
     } else {
       console.log('Deleted file: ', fsFilename);
     }
   }));
+
+  if (!file) return res.status(500).send();
+
   return res.status(200).send();
 };
 
@@ -184,14 +186,17 @@ exports.uploadFileApi = async (req, res) => {
   const type = req.file.mimetype;
   const box = req.params.box;
   const id = req.params.id;
-  await db.addAttachment(filename, fsDirectory, fsFilename, box, id, size, type);
+  const attach = await db.addAttachment(filename, fsDirectory,
+    fsFilename, box, id, size, type);
+  if (!attach) return res.status(500).send();
 
   return res.status(200).send();
 };
 
 exports.downloadFileApi = async (req, res) => {
   const id = req.params.file;
-  const { fsDirectory, fsFilename, filename, mimeType } = await db.getAttachmentByFileId(id);
+  const { fsDirectory, fsFilename, filename, mimeType } =
+    await db.getAttachmentByFileId(id);
   const path = [fsDirectory, fsFilename].join('/');
 
   return res.set({'Content-Type': mimeType}).status(200).download(path, filename);
