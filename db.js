@@ -60,25 +60,46 @@ module.exports = {
 
   getAttachmentById: async (box, id) => {
     return await Attachment.findOne({ doc: box, docId: id },
-      'filename _id').exec();
+      'filename _id').exec()
+      .then(attach => attach)
+      .catch((err) => {
+        console.error(err);
+      });
   },
 
   getUserByName: async (user) => {
     return await User.findOne({ username: user },
-      'firstname lastname email').exec();
+      'firstname lastname email').exec()
+      .then(user => user)
+      .catch((err) => {
+        console.error(err);
+      });
   },
 
   getContacts: async () => {
-    return Contact.find({});
+    return Contact.find({})
+      .then(contacts => contacts)
+      .catch((err) => {
+        console.error(err);
+      });
   },
 
   deleteAttachmentById: async (id) => {
-    return await Attachment.deleteOne({ _id: id });
+    return await Attachment.deleteOne({ _id: id })
+      .then(file => file)
+      .catch((err) => {
+        console.error(err)
+        return null;
+      });
   },
 
   getAttachmentByFileId: async (id) => {
     return await Attachment.findOne({ _id: id },
-      'fsDirectory fsFilename filename mimeType').exec();
+      'fsDirectory fsFilename filename mimeType').exec()
+      .then(file => file)
+      .catch((err) => {
+        console.error(err);
+      });
   },
 
   updateItemById: async (id, box, subject, fromTo, replyTo, note) => {
@@ -206,19 +227,35 @@ module.exports = {
 
   searchContactsByName: async (name) => {
     const string  = new RegExp(name, "i");
-    return await Contact.find({ name: string }, 'name location').exec();
+    return await Contact.find({ name: string }, 'name location').exec()
+      .then(contacts => contacts)
+      .catch((err) => {
+        console.error(err);
+      });
   },
 
   checkUsername: async (username) => {
-    return await User.findOne({ username: username }, 'username');
+    return await User.findOne({ username: username }, 'username').exec()
+      .then(user => user)
+      .catch((err) => {
+        console.error(err);
+      });
   },
 
   checkEmail: async (email) => {
-    return await User.findOne({ email: email }, 'email');
+    return await User.findOne({ email: email }, 'email').exec()
+      .then(email => email)
+      .catch((err) => {
+        console.error(err);
+      });
   },
 
   checkPass: async (user, password) => {
-    return await User.findOne({ username: user }, 'password');
+    return await User.findOne({ username: user }, 'password').exec()
+      .then(pass => pass)
+      .catch((err) => {
+        console.error(err);
+      });
   },
 
   signup: async (username, password, firstname, lastname, email) => {
