@@ -55,6 +55,15 @@ exports.deleteAttachmentByIdApi = async (req, res) => {
   return res.status(200).send();
 };
 
+exports.deleteContactByIdApi = async (req, res) => {
+  const id = req.params.id;
+  const contact = await db.deleteContactById(id);
+
+  if (!contact) return res.status(500).send();
+
+  return res.status(200).send();
+};
+
 exports.addItemApi = async (req, res) => {
   const box = req.params.box;
   const id = await db.addItem(box, req.body.subject,
@@ -76,6 +85,16 @@ exports.updateItemByIdApi = async (req, res) => {
 
   return res.status(200).send();
 };
+ exports.updateContactByIdApi = async (req, res) => {
+   const id = req.body.id
+   const name = req.body.name;
+   const region = req.body.region;
+   const location = req.body.location;
+   const contact = await db.updateContactById(id, name, region, location);
+
+   if (!contact) return res.status(500).send();
+   return res.status(200).send();
+ };
 
 exports.updateStatusApi = async (req, res) => {
   const box = req.params.box;
