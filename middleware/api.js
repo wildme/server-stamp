@@ -19,6 +19,7 @@ exports.getItemByIdApi = async (req, res) => {
   const item = await db.getItemById(box, id);
 
   if (!item) return res.status(500).send();
+  if (!item.length) return res.status(204).send();
   return res.status(200).json(item);
 };
 
