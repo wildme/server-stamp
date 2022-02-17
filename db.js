@@ -88,7 +88,16 @@ module.exports = {
     return await Attachment.deleteOne({ _id: id })
       .then(file => file)
       .catch((err) => {
-        console.error(err)
+        console.error(err);
+        return null;
+      });
+  },
+
+  deleteContactById: async (id) => {
+    return await Contact.deleteOne({ _id: id })
+      .then(contact => contact)
+      .catch((err) => {
+        console.error(err);
         return null;
       });
   },
@@ -146,6 +155,15 @@ module.exports = {
           return null;
         });
     }
+  },
+  updateContactById: async (id, name, region, location) => {
+    return Contact.updateOne({ _id: id },
+      { name: name, region: region, location: location })
+      .then(contact => contact)
+      .catch(err => {
+        console.error(err);
+        return null;
+      });
   },
 
   updateUserEmail: async (user, email) => {
