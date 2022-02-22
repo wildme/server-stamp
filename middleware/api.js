@@ -13,6 +13,14 @@ exports.getItemsApi = async (req, res) => {
   if (!items.length) return res.status(204).send();
 };
 
+exports.getContactsApi = async (req, res) => {
+  const contacts = await db.getContacts();
+
+  if (contacts.length) return res.status(200).json(contacts);
+  if (!contacts.length) return res.status(204).send();
+  if (!conatcts) return res.status(500).send();
+};
+
 exports.getItemByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
@@ -173,13 +181,6 @@ exports.signupApi = async (req, res) => {
   if (!user) return res.status(500).send();
 
   return res.status(201).send();
-};
-
-exports.getContactsApi = async (req, res) => {
-  const contacts = await db.getContacts();
-
-  if (contacts) return res.status(200).json(contacts);
-  else return res.status(204).send();
 };
 
 exports.searchContactsByNameApi = async (req, res) => {
