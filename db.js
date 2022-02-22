@@ -81,6 +81,7 @@ module.exports = {
       .then(contacts => contacts)
       .catch((err) => {
         console.error(err);
+        return null;
       });
   },
 
