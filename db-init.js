@@ -13,17 +13,20 @@ const Inbox = require('./models/inbox.js');
 const Outbox = require('./models/outbox.js');
 const LastId = require('./models/lastId.js');
 const User = require('./models/user.js');
+const Settings = require('./models/settings.js');
 
 const admin = new User({ username: 'admin', password: 'admin',
       firstname: 'John', lastname: 'Doe', email: 'admin@example.com',
       administrator: true });
 const inboxLastId = new LastId({ box: 'inbox' });
 const outboxLastId = new LastId({ box: 'outbox' });
+const settings = new Settings({ language: 'en' });
 
 (async function() {
   const adminUser = await User.exists({ username: 'admin' });
   const inLastId = await LastId.exists({ box: 'inbox' });
   const outLastId = await LastId.exists({ box: 'outbox' });
+  const appSettings = await Settings.exists({ language: 'en' });
 
   if (adminUser) { 
     console.log('Admin user exists');
@@ -42,6 +45,12 @@ const outboxLastId = new LastId({ box: 'outbox' });
   } else {
     await outboxLastId.save();
     console.log('Outbox lastId has been created');
+  }
+  if (appSettings) {
+    console.log('Settings collection exists');
+  } else {
+    await settings.save();
+    console.log('Settings has been created');
   }
   return db.close();
 })();
