@@ -40,6 +40,7 @@ app.get('/api/download/:file', api.downloadFileApi);
 app.get('/api/attachment/delete/:id', api.deleteAttachmentByIdApi);
 app.get('/api/contact/delete/:id', api.deleteContactByIdApi);
 app.get('/api/user/:user', api.getUserByNameApi);
+app.get('/api/get/language', api.getAppLanguageApi);
 app.get('/api/:box', api.getItemsApi);
 app.get('/api/:box/:id', api.getItemByIdApi);
 app.get('/api/attachment/:box/:id', api.getAttachmentByIdApi);
