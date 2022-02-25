@@ -18,6 +18,7 @@ const LastId = require('./models/lastId.js');
 const User = require('./models/user.js');
 const Contact = require('./models/contact.js');
 const Attachment = require('./models/attachment.js');
+const Settings = require('./models/settings.js');
 
 module.exports = {
   getItems: async (box, column, order) => {
@@ -286,6 +287,14 @@ module.exports = {
       .catch(err => {
         console.error(err);
         return null;
+      });
+  },
+
+  getAppLanguage: async () => {
+    return await Settings.findOne({}, 'language').exec()
+      .then(lang => lang)
+      .catch((err) => {
+        console.error(err);
       });
   }
 };
