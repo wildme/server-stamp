@@ -222,3 +222,10 @@ exports.downloadFileApi = async (req, res) => {
 
   return res.set({'Content-Type': mimeType}).status(200).download(path, filename);
 };
+
+exports.getAppLanguageApi = async (req, res) => {
+  const setting = await db.getAppLanguage();
+
+  if (!setting) return res.status(500).send();
+  return res.status(200).json(setting.language);
+};
