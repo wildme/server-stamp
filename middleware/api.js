@@ -170,10 +170,8 @@ exports.signupApi = async (req, res) => {
   const username = await db.checkUsername(req.body.username);
   const email = await db.checkEmail(req.body.email);
 
-  if (username) return res.status(409)
-    .json({error: 'Username is taken'});
-  if (email) return res.status(409)
-    .json({error: 'There is an account using this email'});
+  if (username) return res.status(409).json({error: 'user exists'});
+  if (email) return res.status(409).json({error: 'email exists'});
 
   const user = await db.signup(req.body.username, req.body.password,
     req.body.firstname, req.body.lastname, req.body.email);
