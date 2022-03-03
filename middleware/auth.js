@@ -77,7 +77,8 @@ exports.loginApi = (req, res, next) => {
         username: user.username,
         admin: user.administrator
       };
-      const profile = { username: user.username, admin: user.administrator };
+      const profile = { username: user.username, admin: user.administrator,
+        fullname: [user.firstname, user.lastname].join(' ') };
       const accessToken = jwt.sign(accessToken_payload, 'my_secret');
       const refreshToken = undefined;
 
@@ -105,7 +106,8 @@ exports.refreshTokenApi = (req, res, next) => {
         username: user.username,
         admin: user.administrator
       };
-    const profile = { username: user.username, admin: user.administrator };
+    const profile = { username: user.username, admin: user.administrator,
+      fullname: [user.firstname, user.lastname].join(' ')};
     const accessToken = jwt.sign(accessToken_payload, 'my_secret');
 
     return res.status(200)
