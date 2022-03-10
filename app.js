@@ -3,14 +3,8 @@ const session = require('express-session');
 const cookieparser = require('cookie-parser');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const multer = require('multer');
 
-const upload = multer({ dest: 'files/'
-  + new Date().getFullYear()
-  + '/' + new Date().getMonth(),
-  limits: { fileSize: 5000000 }
-});
-
+const port =  Number(process.env.STAMP_EXPRESSJS);
 const api = require('./middleware/api.js');
 require('./db.js');
 
@@ -28,7 +22,6 @@ app.use(session({
   resave: false
 }));
 
-const port =  process.env.PORT || 3001;
 auth.init(app);
 
 app.get('/api/refresh/token', auth.refreshTokenApi);
@@ -53,7 +46,7 @@ app.post('/api/user/update/info', api.updateUserInfoApi);
 app.post('/api/user/update/password', api.updateUserPasswordApi);
 app.post('/api/contact/update', api.updateContactByIdApi);
 app.post('/api/:box/new', api.addItemApi);
-app.post('/api/:box/upload/:id', upload.single('file'), api.uploadFileApi);
+app.post('/api/:box/upload/:id', api.uploadFileApi);
 app.post('/api/:box/update/:id', api.updateItemByIdApi);
 app.post('/api/:box/status/:id', api.updateStatusApi);
 
