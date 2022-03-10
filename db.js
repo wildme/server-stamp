@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
-const connectionString = process.env.MONGO_SRV || 'mongodb://localhost:27017/test';
+const connectionString = process.env.STAMP_MONGODB;
 
-mongoose.connect(connectionString, {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect(connectionString,
+  { useNewUrlParser: true, useUnifiedTopology: true });
 
 const db = mongoose.connection;
 
@@ -115,10 +116,11 @@ module.exports = {
 
   updateItemById: async (id, box, subject, fromTo, replyTo, note) => {
     if (box === 'inbox') {
-      return await Inbox.updateOne({ id: id },
-        { subject: subject, from: fromTo,
-          replyTo: replyTo, note: note,
-            updated: new Date() })
+      return await Inbox.updateOne({ id: id }, {
+        subject: subject, from: fromTo,
+        replyTo: replyTo, note: note,
+        updated: new Date()
+      })
         .then(item => item)
         .catch(err => {
           console.error(err);
@@ -126,10 +128,11 @@ module.exports = {
         });
     }
     if (box === 'outbox') {
-      return await Outbox.updateOne({ id: id },
-        { subject: subject, to: fromTo,
-          replyTo: replyTo, note: note,
-            updated: new Date() })
+      return await Outbox.updateOne({ id: id }, {
+        subject: subject, to: fromTo,
+        replyTo: replyTo, note: note,
+        updated: new Date()
+      })
         .then(item => item)
         .catch(err => {
           console.error(err);
@@ -158,6 +161,7 @@ module.exports = {
         });
     }
   },
+
   updateContactById: async (id, name, region, location) => {
     return Contact.updateOne({ _id: id },
       { name: name, region: region, location: location })
@@ -207,12 +211,29 @@ module.exports = {
     await LastId.updateOne({ box: box, year: year }, { $inc: { lastId: 1 } });
     const id = await LastId.findOne({ box: box, year: year }, 'lastId');
     const idYearFormat = [id.lastId, year].join('-'); 
+    let doc = undefined;
 
-    const doc = box === 'inbox' ?
-      new Inbox({ id: idYearFormat, from: fromTo, subject: subject,
-        addedBy: addedBy, replyTo: replyTo, note: note, date: new Date }) :
-      new Outbox({ id: idYearFormat, to: fromTo, subject: subject,
-        addedBy: addedBy, replyTo: replyTo, note: note, date: new Date });
+    if (box === 'inbox') {
+      doc = new Inbox({
+        id: idYearFormat,
+        from: fromTo,
+        subject: subject,
+        addedBy: addedBy,
+        replyTo: replyTo,
+        note: note,
+        date: new Date
+      });
+    }
+    if (box === 'outbox') {
+      doc = new Outbox({
+        id: idYearFormat,
+        to: fromTo,
+        subject: subject,
+        addedBy: addedBy, replyTo: replyTo,
+        note: note,
+        date: new Date
+      });
+    }
 
     return await doc.save()
       .then(record => record.id)
@@ -233,10 +254,16 @@ module.exports = {
   },
 
   addAttachment: async (filename, fsDirectory, fsFilename, box, id, size, type) => {
-    const doc = new Attachment({ filename: filename,
-      fsDirectory: fsDirectory, fsFilename: fsFilename,
-      doc: box, docId: id, filesize: size,
-      date: new Date, mimeType: type });
+    const doc = new Attachment({
+      filename: filename,
+      fsDirectory: fsDirectory,
+      fsFilename: fsFilename,
+      doc: box,
+      docId: id,
+      filesize: size,
+      date: new Date,
+      mimeType: type
+    });
     return await doc.save()
       .then(file => file)
       .catch(err => {
@@ -279,8 +306,13 @@ module.exports = {
   },
 
   signup: async (username, password, firstname, lastname, email) => {
-    const user = new User({ username: username, password: password,
-    firstname: firstname, lastname: lastname, email: email });
+    const user = new User({
+      username: username,
+      password: password,
+      firstname: firstname,
+      lastname: lastname,
+      email: email
+    });
 
     return await user.save()
       .then(user => user)
