@@ -20,13 +20,13 @@ const admin = new User({ username: 'admin', password: 'admin',
       administrator: true });
 const inboxLastId = new LastId({ box: 'inbox' });
 const outboxLastId = new LastId({ box: 'outbox' });
-const settings = new Settings({ language: 'en' });
+const language = new Settings({ language: 'en-En' });
 
 (async function() {
   const adminUser = await User.exists({ username: 'admin' });
   const inLastId = await LastId.exists({ box: 'inbox' });
   const outLastId = await LastId.exists({ box: 'outbox' });
-  const appSettings = await Settings.exists({ language: 'en' });
+  const appLanguage = await Settings.findOne({'language': { $exists: true }});
 
   if (adminUser) { 
     console.log('Admin user exists');
@@ -46,11 +46,11 @@ const settings = new Settings({ language: 'en' });
     await outboxLastId.save();
     console.log('Outbox lastId has been created');
   }
-  if (appSettings) {
-    console.log('Settings collection exists');
+  if (appLanguage) {
+    console.log('Language is already set');
   } else {
-    await settings.save();
-    console.log('Settings has been created');
+    await language.save();
+    console.log('Language document has been created in Settings');
   }
   return db.close();
 })();
