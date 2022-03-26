@@ -1,12 +1,10 @@
 const express = require('express');
-const session = require('express-session');
 const cookieparser = require('cookie-parser');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-const port =  Number(process.env.STAMP_EXPRESSJS);
+const port = Number(process.env.STAMP_EXPRESS_PORT) || 3000;
 const api = require('./middleware/api.js');
-require('./db.js');
 
 const app = express();
 const auth = require('./middleware/auth.js');
@@ -15,12 +13,6 @@ app.use('/api', cors());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(cookieparser());
-app.use(session({
-  name: 'session-id',
-  secret: '123-456-789',
-  saveUninitialized: false,
-  resave: false
-}));
 
 auth.init(app);
 
@@ -50,5 +42,6 @@ app.post('/api/:box/upload/:id', api.uploadFileApi);
 app.post('/api/:box/update/:id', api.updateItemByIdApi);
 app.post('/api/:box/status/:id', api.updateStatusApi);
 
-app.listen(port, () => console.log(
-  `Express is running at http://localhost:${port}`));
+app.listen(port, () => {
+  console.log(`Express is running on port ${port}`)
+});
