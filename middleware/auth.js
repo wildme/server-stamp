@@ -6,7 +6,8 @@ const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/user.js');
 const bcrypt = require('bcrypt');
 
-const jwtSecret = process.env.STAMP_JWT_SECRET;
+const jwtAccessSecret = process.env.STAMP_JWT_ACCESS_SECRET;
+const jwtRefreshSecret = process.env.STAMP_JWT_REFRESH_SECRET;
 const jwtCookieAge = Number(process.env.STAMP_JWT_COOKIE_AGE);
 const jwtAccessExp = Number(process.env.STAMP_JWT_ACCESS_EXP);
 const jwtRefreshExp = Number(process.env.STAMP_JWT_REFRESH_EXP);
@@ -23,11 +24,12 @@ passport.deserializeUser(function(id, done) {
 
 passport.use(new JwtStrategy({ jwtFromRequest: function(req) {
   let refreshToken = null;
+
   if (req && req.cookies) refreshToken = req.cookies['jwt'];
 
   return refreshToken;
   },
-  secretOrKey: jwtSecret
+  secretOrKey: jwtRefreshSecret
 },
   function(jwt_payload, done) {
     User.findById(jwt_payload.sub, function(err, user) {
@@ -54,7 +56,6 @@ passport.use(new LocalStrategy(
 
 exports.init = (app) => {
   app.use(passport.initialize());
-  app.use(passport.session());
 };
 
 exports.logoutApi = (req, res) => {
@@ -70,35 +71,40 @@ exports.loginApi = (req, res, next) => {
       console.log(info.message);
       return res.status(401).send();
     }
+
     req.logIn(user, (err) => {
       if (err)  return next(err);
+
       const accessToken_payload = {
         sub: user._id,
         exp: Math.floor(Date.now() / 1000) + jwtAccessExp,
         username: user.username,
         admin: user.administrator
       };
+
       const refreshToken_payload = {
         sub: user._id,
         exp: Math.floor(Date.now() / 1000) + jwtRefreshExp,
         username: user.username,
         admin: user.administrator
       };
+
       const profile = {
         username: user.username,
         admin: user.administrator,
         fullname: [user.firstname, user.lastname].join(' '),
         email: user.email
       };
-      const accessToken = jwt.sign(accessToken_payload, jwtSecret);
+
+      const accessToken = jwt.sign(accessToken_payload, jwtAccessSecret);
       const refreshToken = undefined;
 
       if (!req.cookies['jwt']) {
-        let refreshToken = jwt.sign(refreshToken_payload, jwtSecret);
+        let refreshToken = jwt.sign(refreshToken_payload, jwtRefreshSecret);
 
         return res.status(200)
-        .cookie('jwt', refreshToken, { httpOnly: true, maxAge: jwtCookieAge })
-        .json({ user: profile, token: accessToken });
+          .cookie('jwt', refreshToken, { httpOnly: true, maxAge: jwtCookieAge })
+          .json({ user: profile, token: accessToken });
       }
 
       return res.status(200).json({ user: profile, token: accessToken });
@@ -110,6 +116,7 @@ exports.refreshTokenApi = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     if (err) return next(err);
     if (!user) return res.status(401).send();
+
     const accessToken_payload = {
       sub: user._id,
       exp: Math.floor(Date.now() / 1000) + jwtAccessExp,
@@ -122,14 +129,14 @@ exports.refreshTokenApi = (req, res, next) => {
       fullname: [user.firstname, user.lastname].join(' '),
       email: user.email
     };
-    const accessToken = jwt.sign(accessToken_payload, jwtSecret);
+    const accessToken = jwt.sign(accessToken_payload, jwtAccessSecret);
 
     return res.status(200).json({ user: profile, token: accessToken });
   })(req, res, next);
 };
 
 exports.verifyTokenApi = (req, res) => {
-  jwt.verify(req.body.token, jwtSecret, (err, decoded) => {
+  jwt.verify(req.body.token, jwtAccessSecret, (err, decoded) => {
     if (err) {
       if (err.message === 'jwt expired') {
         return res.status(401).send();
