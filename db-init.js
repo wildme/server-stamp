@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const connectionString = process.env.MONGO_SRV || 'mongodb://localhost:27017/test';
+const connectionString = process.env.STAMP_MONGODB || 'mongodb://localhost:27017/test';
 
 mongoose.connect(connectionString, {useNewUrlParser: true, useUnifiedTopology: true});
 const db = mongoose.connection;
@@ -20,7 +20,7 @@ const admin = new User({ username: 'admin', password: 'admin',
       administrator: true });
 const inboxLastId = new LastId({ box: 'inbox' });
 const outboxLastId = new LastId({ box: 'outbox' });
-const language = new Settings({ language: 'en-En' });
+const language = new Settings({ language: process.env.STAMP_LANG || 'en-En' });
 
 (async function() {
   const adminUser = await User.exists({ username: 'admin' });
