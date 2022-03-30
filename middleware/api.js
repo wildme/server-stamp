@@ -233,7 +233,7 @@ exports.uploadFileApi = async (req, res) => {
 
 exports.downloadFileApi = async (req, res) => {
   const id = req.params.file;
-  const {fsDirectory, fsFilename, filename, mimeType} =
+  const { fsDirectory, fsFilename, filename, mimeType } =
     await db.getAttachmentByFileId(id);
   const path = [fsDirectory, fsFilename].join('/');
 
