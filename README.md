@@ -4,7 +4,7 @@ Server-side part of Stamp: Node.js, Express.js, MongoDB
 ## Used shell variables
 
 export STAMP_EXPRESS_PORT=3000  
-export STAMP_EXPRESS_STATIC_DIR='build'
+export STAMP_EXPRESS_STATIC_DIR='build'  
 export STAMP_MONGODB='mongodb://127.0.0.1:27017/test'  
 export STAMP_LANG='en-En' ***# BCP 47***  
 export STAMP_MAX_FILESIZE=5000000 ***# in bytes. 5MB***  
