@@ -4,10 +4,11 @@ const bcrypt = require('bcrypt');
 const multer = require('multer');
 const path = require('path');
 
-const maxFileSize = Number(process.env.STAMP_MAX_FILESIZE);
+const maxFileSize = Number(process.env.STAMP_MAX_FILESIZE) || 5000000;
+const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
 
 exports.getReactIndex = async (req, res) => {
-  return res.sendFile(path.join(process.cwd(), 'build', 'index.html'));
+  return res.sendFile(path.join(process.cwd(), staticDir, 'index.html'));
 };
 
 exports.getItemsApi = async (req, res) => {
