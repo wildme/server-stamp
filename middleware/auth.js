@@ -6,7 +6,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/user.js');
 const bcrypt = require('bcrypt');
 
-const jwtAccessSecret = process.env.STAMP_JWT_ACCESS_SECRET) || 'secret1';
+const jwtAccessSecret = process.env.STAMP_JWT_ACCESS_SECRET || 'secret1';
 const jwtRefreshSecret = process.env.STAMP_JWT_REFRESH_SECRET || 'secret2';
 const jwtCookieAge = Number(process.env.STAMP_JWT_COOKIE_AGE) || 28800000;
 const jwtAccessExp = Number(process.env.STAMP_JWT_ACCESS_EXP) || 600;
