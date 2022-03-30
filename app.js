@@ -3,21 +3,21 @@ const cookieparser = require('cookie-parser');
 //const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
-
-const port = Number(process.env.STAMP_EXPRESS_PORT) || 3000;
 const api = require('./middleware/api.js');
-
-const app = express();
 const auth = require('./middleware/auth.js');
 
+const port = Number(process.env.STAMP_EXPRESS_PORT) || 3000;
+const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
+
+const app = express();
+
 //app.use('/api', cors());
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname, staticDir)));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(cookieparser());
 
 auth.init(app);
-
 
 app.get('/api/refresh/token', auth.refreshTokenApi);
 app.get('/api/logout', auth.logoutApi);
