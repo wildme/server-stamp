@@ -1,20 +1,23 @@
 const express = require('express');
 const cookieparser = require('cookie-parser');
-const cors = require('cors');
+//const cors = require('cors');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const port = Number(process.env.STAMP_EXPRESS_PORT) || 3000;
 const api = require('./middleware/api.js');
 
 const app = express();
 const auth = require('./middleware/auth.js');
-app.use('/api', cors());
 
+//app.use('/api', cors());
+app.use(express.static(path.join(__dirname, 'build')));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(cookieparser());
 
 auth.init(app);
+
 
 app.get('/api/refresh/token', auth.refreshTokenApi);
 app.get('/api/logout', auth.logoutApi);
@@ -29,6 +32,7 @@ app.get('/api/get/language', api.getAppLanguageApi);
 app.get('/api/:box', api.getItemsApi);
 app.get('/api/:box/:id', api.getItemByIdApi);
 app.get('/api/attachment/:box/:id', api.getAttachmentByIdApi);
+app.get('/*', api.getReactIndex);
 app.post('/api/verify/token', auth.verifyTokenApi);
 app.post('/api/login', auth.loginApi);
 app.post('/api/signup', api.signupApi);
