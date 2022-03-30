@@ -2,14 +2,19 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const saltRounds = 10;
-
 const userSchema = mongoose.Schema({
   username: { type: String, unique: true, required: true },
   password: { type: String, required: true },
   firstname: { type: String, required: true },
   lastname: { type: String },
   email: { type: String, unique: true, required: true },
-  administrator: { type: Boolean, default: false }
+  administrator: { type: Boolean, default: false },
+  status: {
+    type: String,
+    enum: ['active', 'disabled'],
+    reqiured: true,
+    default: 'active'
+  }
 });
 
 userSchema.pre('save', function(next) {
