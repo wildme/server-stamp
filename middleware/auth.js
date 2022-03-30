@@ -22,7 +22,7 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
-passport.use(new JwtStrategy({ jwtFromRequest: function(req) {
+passport.use(new JwtStrategy({jwtFromRequest: function(req) {
   let refreshToken = null;
 
   if (req && req.cookies) refreshToken = req.cookies['jwt'];
@@ -43,12 +43,12 @@ passport.use(new JwtStrategy({ jwtFromRequest: function(req) {
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    User.findOne({ username: username }, function(err, user) {
+    User.findOne({username: username}, function(err, user) {
       if (err) return done(err);
-      if (!user) return done(null, false, { message: 'Incorrect username' });
+      if (!user) return done(null, false, {message: 'Incorrect username'});
       bcrypt.compare(password, user.password, function(err, result) {
         if (result) return done(null, user);
-        else return done(null, false, { message: 'Incorrect password' });
+        else return done(null, false, {message: 'Incorrect password'});
       });
     })
   }
@@ -61,19 +61,19 @@ exports.init = (app) => {
 exports.logoutApi = (req, res) => {
   req.logOut();
   res.clearCookie('jwt');
-  res.status(200).send();
+  res.sendStatus(200);
 };
 
 exports.loginApi = (req, res, next) => {
-  passport.authenticate('local', { session: false }, (err, user, info) => {
+  passport.authenticate('local', {session: false}, (err, user, info) => {
     if (err) return next(err);
     if (!user) {
       console.log(info.message);
-      return res.status(401).send();
+      return res.sendStatus(401);
     }
 
     req.logIn(user, (err) => {
-      if (err)  return next(err);
+      if (err) return next(err);
 
       const accessToken_payload = {
         sub: user._id,
@@ -103,19 +103,19 @@ exports.loginApi = (req, res, next) => {
         let refreshToken = jwt.sign(refreshToken_payload, jwtRefreshSecret);
 
         return res.status(200)
-          .cookie('jwt', refreshToken, { httpOnly: true, maxAge: jwtCookieAge })
+          .cookie('jwt', refreshToken, {httpOnly: true, maxAge: jwtCookieAge})
           .json({ user: profile, token: accessToken });
       }
 
-      return res.status(200).json({ user: profile, token: accessToken });
+      return res.json({user: profile, token: accessToken});
       })
     })(req, res, next);
 };
 
 exports.refreshTokenApi = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+  passport.authenticate('jwt', {session: false}, (err, user, info) => {
     if (err) return next(err);
-    if (!user) return res.status(401).send();
+    if (!user) return res.sendStatus(401);
 
     const accessToken_payload = {
       sub: user._id,
@@ -131,7 +131,7 @@ exports.refreshTokenApi = (req, res, next) => {
     };
     const accessToken = jwt.sign(accessToken_payload, jwtAccessSecret);
 
-    return res.status(200).json({ user: profile, token: accessToken });
+    return res.json({user: profile, token: accessToken});
   })(req, res, next);
 };
 
@@ -139,11 +139,11 @@ exports.verifyTokenApi = (req, res) => {
   jwt.verify(req.body.token, jwtAccessSecret, (err, decoded) => {
     if (err) {
       if (err.message === 'jwt expired') {
-        return res.status(401).send();
+        return res.sendStatus(401);
       }
-      return res.status(401).send();
+      return res.sendStatus(401);
     } else {
-      return res.status(200).send();
+      return res.sendStatus(200);
     }
   });
 };
