@@ -4,13 +4,6 @@ const bcrypt = require('bcrypt');
 const multer = require('multer');
 
 const maxFileSize = Number(process.env.STAMP_MAX_FILESIZE);
-const upload = multer(
-  { dest: 'files/'
-  + new Date().getFullYear()
-  + '/' + new Date().getMonth(),
-  limits: {fileSize: maxFileSize}
-  }
-).single('file');
 
 exports.getItemsApi = async (req, res) => {
   const box = req.params.box;
@@ -208,6 +201,12 @@ exports.addContactApi = async (req, res) => {
 };
 
 exports.uploadFileApi = async (req, res) => {
+  const upload = multer(
+  { dest: `files/${new Date().getFullYear()}/${new Date().getMonth()}`,
+    limits: { fileSize: maxFileSize }
+  }
+).single('file');
+
   upload(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       if (err.message === 'File too large') return res.sendStatus(413);
@@ -228,7 +227,6 @@ exports.uploadFileApi = async (req, res) => {
       fsFilename, box, id,
       size, type);
     if (!attach) return res.sendStatus(500);
-
     return res.sendStatus(200);
   });
 };
