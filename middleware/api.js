@@ -1,9 +1,14 @@
-const db = require('../db.js');
 const fs = require('fs');
+const db = require('../db.js');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
+const path = require('path');
 
 const maxFileSize = Number(process.env.STAMP_MAX_FILESIZE);
+
+exports.getReactIndex = async (req, res) => {
+  return res.sendFile(path.join(process.cwd(), 'build', 'index.html'));
+};
 
 exports.getItemsApi = async (req, res) => {
   const box = req.params.box;
