@@ -8,7 +8,7 @@ const upload = multer(
   { dest: 'files/'
   + new Date().getFullYear()
   + '/' + new Date().getMonth(),
-  limits: { fileSize: maxFileSize }
+  limits: {fileSize: maxFileSize}
   }
 ).single('file');
 
@@ -18,17 +18,17 @@ exports.getItemsApi = async (req, res) => {
   const order = req.query.order || 'asc';
   const items = await db.getItems(box, column, order);
 
-  if (!items) return res.status(500).send();
-  if (items.length) return res.status(200).json(items);
-  if (!items.length) return res.status(204).send();
+  if (!items) return res.sendStatus(500);
+  if (items.length) return res.json(items);
+  if (!items.length) return res.sendStatus(204);
 };
 
 exports.getContactsApi = async (req, res) => {
   const contacts = await db.getContacts();
 
-  if (contacts.length) return res.status(200).json(contacts);
-  if (!contacts.length) return res.status(204).send();
-  if (!conatcts) return res.status(500).send();
+  if (contacts.length) return res.json(contacts);
+  if (!contacts.length) return res.sendStatus(204);
+  if (!conatcts) return res.sendStatus(500);
 };
 
 exports.getItemByIdApi = async (req, res) => {
@@ -36,24 +36,24 @@ exports.getItemByIdApi = async (req, res) => {
   const id = req.params.id;
   const item = await db.getItemById(box, id);
 
-  if (!item) return res.status(500).send();
-  if (!item.length) return res.status(204).send();
-  return res.status(200).json(item);
+  if (!item) return res.sendStatus(500);
+  if (!item.length) return res.sendStatus(204);
+  return res.json(item);
 };
 
 exports.getAttachmentByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
   const attachment = await db.getAttachmentById(box, id);
-  if (attachment) return res.status(200).json(attachment);
-  else return res.status(204).send();
+  if (attachment) return res.json(attachment);
+  else return res.sendStatus(204);
 };
 
 exports.getUserByNameApi = async (req, res) => {
   const user = req.params.user;
   const profile = await db.getUserByName(user);
-  if (profile) return res.status(200).json(profile);
-  else return res.status(204).send();
+  if (profile) return res.json(profile);
+  else return res.sendStatus(204);
 };
 
 exports.deleteAttachmentByIdApi = async (req, res) => {
@@ -69,18 +69,18 @@ exports.deleteAttachmentByIdApi = async (req, res) => {
     }
   }));
 
-  if (!file) return res.status(500).send();
+  if (!file) return res.sendStatus(500);
 
-  return res.status(200).send();
+  return res.sendStatus(200);
 };
 
 exports.deleteContactByIdApi = async (req, res) => {
   const id = req.params.id;
   const contact = await db.deleteContactById(id);
 
-  if (!contact) return res.status(500).send();
+  if (!contact) return res.sendStatus(500);
 
-  return res.status(200).send();
+  return res.sendStatus(200);
 };
 
 exports.addItemApi = async (req, res) => {
@@ -89,9 +89,9 @@ exports.addItemApi = async (req, res) => {
     req.body.fromTo, req.body.addedBy,
     req.body.replyTo, req.body.note);
 
-  if (!id) return res.status(500).send();
+  if (!id) return res.sendStatus(500);
 
-  return res.status(200).json(id);
+  return res.json(id);
 };
 
 exports.updateItemByIdApi = async (req, res) => {
@@ -100,9 +100,9 @@ exports.updateItemByIdApi = async (req, res) => {
   const item = await db.updateItemById(id, box, req.body.subject,
     req.body.fromTo, req.body.replyTo, req.body.note);
 
-  if (!item) return res.status(500).send();
+  if (!item) return res.sendStatus(500);
 
-  return res.status(200).send();
+  return res.sendStatus(200);
 };
  exports.updateContactByIdApi = async (req, res) => {
    const id = req.body.id
@@ -111,8 +111,8 @@ exports.updateItemByIdApi = async (req, res) => {
    const location = req.body.location;
    const contact = await db.updateContactById(id, name, region, location);
 
-   if (!contact) return res.status(500).send();
-   return res.status(200).send();
+   if (!contact) return res.sendStatus(500);
+   return res.sendStatus(200);
  };
 
 exports.updateStatusApi = async (req, res) => {
@@ -121,9 +121,9 @@ exports.updateStatusApi = async (req, res) => {
   const status = req.body.newStatus;
   const itemStatus = await db.updateStatus(box, id, status);
 
-  if (!itemStatus) return res.status(500).send();
+  if (!itemStatus) return res.sendStatus(500);
 
-  return res.status(200).send();
+  return res.sendStatus(200);
 };
 
 exports.updateUserEmailApi = async (req, res) => {
@@ -131,13 +131,13 @@ exports.updateUserEmailApi = async (req, res) => {
   const email = req.body.email;
   const emailExists = await db.checkEmail(email);
 
-  if (emailExists) return res.status(409).send();
+  if (emailExists) return res.sendStatus(409);
 
   const emailUpdate = await db.updateUserEmail(user, email);
 
-  if (!emailUpdate) return res.status(500).send();
+  if (!emailUpdate) return res.sendStatus(500);
 
-  return res.status(200).send();
+  return res.sendStatus(200);
 };
 
 exports.updateUserInfoApi = async (req, res) => {
@@ -146,9 +146,9 @@ exports.updateUserInfoApi = async (req, res) => {
   const lastname = req.body.lastname;
 
   const info = await db.updateUserInfo(user, firstname, lastname);
-  if (!info) return res.status(500).send();
+  if (!info) return res.sendStatus(500);
 
-  return res.status(200).send();
+  return res.sendStatus(200);
 };
 
 exports.updateUserPasswordApi = async (req, res) => {
@@ -168,11 +168,11 @@ exports.updateUserPasswordApi = async (req, res) => {
       })
       .catch((e) => {
         console.error(e)
-        return res.status(500).send();
+        return res.sendStatus(500);
       });
-      res.status(200).send();
+      res.sendStatus(200);
   } else {
-    return res.send(409).send();
+    return res.sendStatus(409);
   }
 };
 
@@ -186,9 +186,9 @@ exports.signupApi = async (req, res) => {
   const user = await db.signup(req.body.username, req.body.password,
     req.body.firstname, req.body.lastname, req.body.email);
 
-  if (!user) return res.status(500).send();
+  if (!user) return res.sendStatus(500);
 
-  return res.status(201).send();
+  return res.sendStatus(201);
 };
 
 exports.searchContactsByNameApi = async (req, res) => {
@@ -202,18 +202,18 @@ exports.addContactApi = async (req, res) => {
   const contact = await db.addContact(req.body.orgLocation,
     req.body.orgRegion, req.body.orgName);
 
-  if (!contact) return res.status(500).send();
+  if (!contact) return res.sendStatus(500);
 
-  return res.status(200).send();
+  return res.sendStatus(200);
 };
 
 exports.uploadFileApi = async (req, res) => {
   upload(req, res, (err) => {
     if (err instanceof multer.MulterError) {
-      if (err.message === 'File too large') return res.status(413).send();
-      return res.status(500).send();
+      if (err.message === 'File too large') return res.sendStatus(413);
+      return res.sendStatus(500);
     } else if (err) {
-      return res.status(500).send();
+      return res.sendStatus(500);
     }
 
     const filename = req.file.originalname;
@@ -227,24 +227,24 @@ exports.uploadFileApi = async (req, res) => {
       filename, fsDirectory,
       fsFilename, box, id,
       size, type);
-    if (!attach) return res.status(500).send();
+    if (!attach) return res.sendStatus(500);
 
-    return res.status(200).send();
+    return res.sendStatus(200);
   });
 };
 
 exports.downloadFileApi = async (req, res) => {
   const id = req.params.file;
-  const { fsDirectory, fsFilename, filename, mimeType } =
+  const {fsDirectory, fsFilename, filename, mimeType} =
     await db.getAttachmentByFileId(id);
   const path = [fsDirectory, fsFilename].join('/');
 
-  return res.set({'Content-Type': mimeType}).status(200).download(path, filename);
+  return res.set({'Content-Type': mimeType}).download(path, filename);
 };
 
 exports.getAppLanguageApi = async (req, res) => {
   const setting = await db.getAppLanguage();
 
-  if (!setting) return res.status(500).send();
-  return res.status(200).json(setting.language);
+  if (!setting) return res.sendStatus(500);
+  return res.json(setting.language);
 };
