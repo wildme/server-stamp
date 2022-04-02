@@ -147,8 +147,7 @@ module.exports = {
       .catch(err => {console.error(err); return null;});
   },
 
-  addItem: async (box, subject, fromTo, addedBy, replyTo, note) => {
-    const year = new Date().getFullYear();
+  addItem: async (box, year, subject, fromTo, addedBy, replyTo, note) => {
     const docForCurrentYear = await LastId.findOne({box: box, year: year});
 
     if (!(docForCurrentYear)) new LastId({box: box, year: year}).save();
