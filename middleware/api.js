@@ -85,9 +85,16 @@ exports.deleteContactByIdApi = async (req, res) => {
 
 exports.addItemApi = async (req, res) => {
   const box = req.params.box;
-  const id = await db.addItem(box, req.body.subject,
-    req.body.fromTo, req.body.addedBy,
-    req.body.replyTo, req.body.note);
+  const year = new Date().getFullYear();
+  const id = await db.addItem(
+    box,
+    year,
+    req.body.subject,
+    req.body.fromTo,
+    req.body.addedBy,
+    req.body.replyTo,
+    req.body.note
+  );
 
   if (!id) return res.sendStatus(500);
   return res.json(id);
