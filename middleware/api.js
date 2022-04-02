@@ -6,6 +6,7 @@ const path = require('path');
 
 const maxFileSize = Number(process.env.STAMP_MAX_FILESIZE) || 5000000;
 const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
+const uploadDir = String(process.env.STAMP_EXPRESS_UPLOAD_DIR) || 'files';
 
 exports.getReactIndex = async (req, res) => {
   return res.sendFile(path.join(process.cwd(), staticDir, 'index.html'));
@@ -44,6 +45,7 @@ exports.getAttachmentByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
   const attachment = await db.getAttachmentById(box, id);
+
   if (attachment) return res.json(attachment);
   else return res.sendStatus(204);
 };
@@ -51,6 +53,7 @@ exports.getAttachmentByIdApi = async (req, res) => {
 exports.getUserByNameApi = async (req, res) => {
   const user = req.params.user;
   const profile = await db.getUserByName(user);
+
   if (profile) return res.json(profile);
   else return res.sendStatus(204);
 };
@@ -69,7 +72,6 @@ exports.deleteAttachmentByIdApi = async (req, res) => {
   }));
 
   if (!file) return res.sendStatus(500);
-
   return res.sendStatus(200);
 };
 
@@ -78,7 +80,6 @@ exports.deleteContactByIdApi = async (req, res) => {
   const contact = await db.deleteContactById(id);
 
   if (!contact) return res.sendStatus(500);
-
   return res.sendStatus(200);
 };
 
@@ -89,7 +90,6 @@ exports.addItemApi = async (req, res) => {
     req.body.replyTo, req.body.note);
 
   if (!id) return res.sendStatus(500);
-
   return res.json(id);
 };
 
@@ -100,19 +100,19 @@ exports.updateItemByIdApi = async (req, res) => {
     req.body.fromTo, req.body.replyTo, req.body.note);
 
   if (!item) return res.sendStatus(500);
-
   return res.sendStatus(200);
 };
- exports.updateContactByIdApi = async (req, res) => {
-   const id = req.body.id
-   const name = req.body.name;
-   const region = req.body.region;
-   const location = req.body.location;
-   const contact = await db.updateContactById(id, name, region, location);
 
-   if (!contact) return res.sendStatus(500);
-   return res.sendStatus(200);
- };
+exports.updateContactByIdApi = async (req, res) => {
+  const id = req.body.id
+  const name = req.body.name;
+  const region = req.body.region;
+  const location = req.body.location;
+  const contact = await db.updateContactById(id, name, region, location);
+
+  if (!contact) return res.sendStatus(500);
+  return res.sendStatus(200);
+};
 
 exports.updateStatusApi = async (req, res) => {
   const box = req.params.box;
@@ -121,7 +121,6 @@ exports.updateStatusApi = async (req, res) => {
   const itemStatus = await db.updateStatus(box, id, status);
 
   if (!itemStatus) return res.sendStatus(500);
-
   return res.sendStatus(200);
 };
 
@@ -131,11 +130,9 @@ exports.updateUserEmailApi = async (req, res) => {
   const emailExists = await db.checkEmail(email);
 
   if (emailExists) return res.sendStatus(409);
-
   const emailUpdate = await db.updateUserEmail(user, email);
 
   if (!emailUpdate) return res.sendStatus(500);
-
   return res.sendStatus(200);
 };
 
@@ -143,10 +140,9 @@ exports.updateUserInfoApi = async (req, res) => {
   const user = req.body.user;
   const firstname = req.body.firstname;
   const lastname = req.body.lastname;
-
   const info = await db.updateUserInfo(user, firstname, lastname);
-  if (!info) return res.sendStatus(500);
 
+  if (!info) return res.sendStatus(500);
   return res.sendStatus(200);
 };
 
@@ -154,7 +150,6 @@ exports.updateUserPasswordApi = async (req, res) => {
   const user = req.body.user;
   const oldPass = req.body.oldPass;
   const newPass = req.body.newPass;
-
   const { password } = await db.checkPass(user, oldPass);
   const checkPass = bcrypt.compareSync(oldPass, password);
 
@@ -165,11 +160,8 @@ exports.updateUserPasswordApi = async (req, res) => {
         const pass = db.updateUserPassword(user, hash);
         if (!pass) throw new Error("Password wasn't updated");
       })
-      .catch((e) => {
-        console.error(e)
-        return res.sendStatus(500);
-      });
-      res.sendStatus(200);
+      .catch((e) => {console.error(e); return res.sendStatus(500);})
+      return res.sendStatus(200);
   } else {
     return res.sendStatus(409);
   }
@@ -182,11 +174,15 @@ exports.signupApi = async (req, res) => {
   if (username) return res.status(409).json({error: 'user exists'});
   if (email) return res.status(409).json({error: 'email exists'});
 
-  const user = await db.signup(req.body.username, req.body.password,
-    req.body.firstname, req.body.lastname, req.body.email);
+  const user = await db.signup(
+    req.body.username,
+    req.body.password,
+    req.body.firstname,
+    req.body.lastname,
+    req.body.email
+  );
 
   if (!user) return res.sendStatus(500);
-
   return res.sendStatus(201);
 };
 
@@ -202,16 +198,14 @@ exports.addContactApi = async (req, res) => {
     req.body.orgRegion, req.body.orgName);
 
   if (!contact) return res.sendStatus(500);
-
   return res.sendStatus(200);
 };
 
 exports.uploadFileApi = async (req, res) => {
-  const upload = multer(
-  { dest: `files/${new Date().getFullYear()}/${new Date().getMonth()}`,
+  const upload = multer({
+    dest: `${uploadDir}/${new Date().getFullYear()}/${new Date().getMonth()}`,
     limits: { fileSize: maxFileSize }
-  }
-).single('file');
+  }).single('file');
 
   upload(req, res, (err) => {
     if (err instanceof multer.MulterError) {
@@ -229,9 +223,14 @@ exports.uploadFileApi = async (req, res) => {
     const box = req.params.box;
     const id = req.params.id;
     const attach = db.addAttachment(
-      filename, fsDirectory,
-      fsFilename, box, id,
-      size, type);
+      filename,
+      fsDirectory,
+      fsFilename,
+      box,
+      id,
+      size,
+      type);
+
     if (!attach) return res.sendStatus(500);
     return res.sendStatus(200);
   });
