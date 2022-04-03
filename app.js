@@ -3,14 +3,22 @@ const cookieparser = require('cookie-parser');
 //const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const { mkdir, access, constants } = require('fs');
 const api = require('./middleware/api.js');
 const auth = require('./middleware/auth.js');
 
 const port = Number(process.env.STAMP_EXPRESS_PORT) || 3000;
 const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
+const uploadDir = String(process.env.STAMP_EXPRESS_UPLOAD_DIR) || 'files';
 
 const app = express();
-
+access(uploadDir, constants.F_OK, (err) => {
+  if (err) {
+    mkdir(uploadDir, (err)  => {
+      if (err) throw err;
+    });
+  }
+});
 //app.use('/api', cors());
 app.use(express.static(path.join(__dirname, staticDir)));
 app.use(bodyParser.urlencoded({extended: true}));
