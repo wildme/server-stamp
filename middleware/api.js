@@ -65,7 +65,7 @@ exports.deleteAttachmentByIdApi = async (req, res) => {
 
   fs.unlink(`${fsDirectory}/${fsFilename}`, (err => {
     if (err) {
-      console.log(err);
+      console.error(err);
     } else {
       console.log('Deleted file: ', fsFilename);
     }
