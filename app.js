@@ -7,18 +7,21 @@ const { mkdir, access, constants } = require('fs');
 const api = require('./middleware/api.js');
 const auth = require('./middleware/auth.js');
 
+const app = express();
 const port = Number(process.env.STAMP_EXPRESS_PORT) || 3000;
 const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
 const uploadDir = String(process.env.STAMP_EXPRESS_UPLOAD_DIR) || 'files';
+const appDirs = [staticDir, uploadDir];
 
-const app = express();
-access(uploadDir, constants.F_OK, (err) => {
-  if (err) {
-    mkdir(uploadDir, (err)  => {
-      if (err) throw err;
-    });
-  }
-});
+for (let i = 0; i < appDirs.length; i++) {
+  access(appDirs[i], constants.F_OK, (err) => {
+    if (err) {
+      mkdir(appDirs[i], (err)  => {
+        if (err) throw err;
+      });
+    }
+  });
+}
 //app.use('/api', cors());
 app.use(express.static(path.join(__dirname, staticDir)));
 app.use(bodyParser.urlencoded({extended: true}));
