@@ -1,12 +1,21 @@
 const mongoose = require('mongoose');
-const connectionString = process.env.STAMP_MONGODB;
-
-mongoose.connect(connectionString,
-  { useNewUrlParser: true, useUnifiedTopology: true });
-
 const db = mongoose.connection;
+const connectionString = process.env.STAMP_MONGODB;
+const opts = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  connectTimeoutMS: 5000
+}
 
-db.on('error', err => {
+mongoose.connect(connectionString, opts );
+
+process.on('SIGINT', () => {
+  db.close((err) => {
+    process.exit(err ? 1 : 0);
+  });
+});
+
+db.on('error', (err) => {
   console.error(err.message);
   process.exit(1);
 });
