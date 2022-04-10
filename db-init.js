@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const connectionString = process.env.STAMP_MONGODB || 'mongodb://localhost:27017/test';
+const connectionString = process.env.STAMP_MONGODB || 'mongodb://localhost:27017/stamp';
 
 mongoose.connect(connectionString, {useNewUrlParser: true, useUnifiedTopology: true});
 const db = mongoose.connection;
