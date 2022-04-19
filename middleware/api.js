@@ -1,6 +1,7 @@
 const fs = require('fs');
 const db = require('../db.js');
-const bcrypt = require('bcrypt');
+const smtp = require('../libs/smtp.js');
+const hashpass = require('../libs/hashpass.js');
 const multer = require('multer');
 const path = require('path');
 
@@ -103,8 +104,10 @@ exports.addItemApi = async (req, res) => {
 exports.updateItemByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
-  const item = await db.updateItemById(id, box, req.body.subject,
-    req.body.fromTo, req.body.replyTo, req.body.note);
+  const item = await db.updateItemById(
+    id, box, req.body.subject,
+    req.body.fromTo, req.body.replyTo, req.body.note
+  );
 
   if (!item) return res.sendStatus(500);
   return res.sendStatus(200);
@@ -154,24 +157,21 @@ exports.updateUserInfoApi = async (req, res) => {
 };
 
 exports.updateUserPasswordApi = async (req, res) => {
-  const user = req.body.user;
+  const username = req.body.user;
   const oldPass = req.body.oldPass;
   const newPass = req.body.newPass;
-  const { password } = await db.checkPass(user, oldPass);
-  const checkPass = bcrypt.compareSync(oldPass, password);
+  const { password } = await db.checkPass(username, oldPass);
+  const checkPass = await hashpass.cmpHash(oldPass, password);
 
-  if (checkPass) {
-    const saltRounds = 10;
-    bcrypt.hash(newPass, saltRounds)
-      .then(hash => {
-        const pass = db.updateUserPassword(user, hash);
-        if (!pass) throw new Error("Password wasn't updated");
-      })
-      .catch((e) => {console.error(e); return res.sendStatus(500);})
-      return res.sendStatus(200);
-  } else {
-    return res.sendStatus(409);
-  }
+  if (!checkPass) return res.sendStatus(409);
+
+  const hash = await hashpass.getHashOfPass(newPass, username);
+  if (!hash) return res.sendStatus(500);
+
+  const pass = await db.updateUserPassword(username, hash);
+  if (!pass) return res.sendStatus(500);
+
+  return res.sendStatus(200);
 };
 
 exports.signupApi = async (req, res) => {
@@ -257,4 +257,25 @@ exports.getAppLanguageApi = async (req, res) => {
 
   if (!setting) return res.sendStatus(500);
   return res.json(setting.language);
+};
+
+exports.resetPasswordApi = async (req, res) => {
+  const username = req.body.username;
+  const email = req.body.email;
+  const newPass = String(Math.floor(Math.random() * 100000000) + 100000);
+
+  const emailExists = await db.checkEmail(email);
+  const usernameExists = await db.checkUsername(username);
+
+  if (!usernameExists) return res.send(204).json("User not found");
+  if (!emailExists) return res.sendStatus(204).json("Email not found");
+
+  const hash = await hashpass.getHashOfPass(newPass, username);
+  if (!hash) return res.sendStatus(500);
+
+  const pass = await db.updateUserPassword(username, hash);
+  if (!pass) return res.sendStatus(500);
+
+  const emailSent = smtp.sendCreds(email, username, newPass);
+  if (emailSent) return res.sendStatus(200);
 };
