@@ -267,8 +267,8 @@ exports.resetPasswordApi = async (req, res) => {
   const emailExists = await db.checkEmail(email);
   const usernameExists = await db.checkUsername(username);
 
-  if (!usernameExists) return res.send(204).json("User not found");
-  if (!emailExists) return res.sendStatus(204).json("Email not found");
+  if (!usernameExists) return res.send(204).json({info: 'User not found'});
+  if (!emailExists) return res.sendStatus(204).json({info: 'Email not found'});
 
   const hash = await hashpass.getHashOfPass(newPass, username);
   if (!hash) return res.sendStatus(500);
@@ -277,5 +277,7 @@ exports.resetPasswordApi = async (req, res) => {
   if (!pass) return res.sendStatus(500);
 
   const emailSent = smtp.sendCreds(email, username, newPass);
-  if (emailSent) return res.sendStatus(200);
+  if (!emailSent) return res.sendStatus(500);
+
+  return res.sendStatus(200);
 };
