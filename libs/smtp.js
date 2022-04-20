@@ -20,7 +20,7 @@ exports.sendCreds = async (email, username, password) => {
   const message = {
     from: String(process.env.STAMP_EXPRESS_SMTP_FROM),
     to: email,
-    subject: "You have resetted your password",
+    subject: "You have reseted your password",
     text: `login: ${username}\npassword: ${password}`
   };
 
