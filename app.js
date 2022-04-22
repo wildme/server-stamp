@@ -6,6 +6,7 @@ const path = require('path');
 const { mkdir, access, constants } = require('fs');
 const api = require('./middleware/api.js');
 const auth = require('./middleware/auth.js');
+const fup = require('./middleware/fup.js');
 
 const app = express();
 const port = Number(process.env.STAMP_EXPRESS_PORT) || 3000;
@@ -54,7 +55,7 @@ app.post('/api/user/update/password', api.updateUserPasswordApi);
 app.post('/api/contact/update', api.updateContactByIdApi);
 app.post('/api/reset/password', api.resetPasswordApi);
 app.post('/api/:box/new', api.addItemApi);
-app.post('/api/:box/upload/:id', api.uploadFileApi);
+app.post('/api/:box/upload/:id', fup.uploadFileApi);
 app.post('/api/:box/update/:id', api.updateItemByIdApi);
 app.post('/api/:box/status/:id', api.updateStatusApi);
 
