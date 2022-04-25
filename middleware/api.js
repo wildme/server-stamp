@@ -4,6 +4,8 @@ const smtp = require('../libs/smtp.js');
 const hashpass = require('../libs/hashpass.js');
 const path = require('path');
 
+const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
+
 exports.getReactIndex = async (req, res) => {
   return res.sendFile(path.join(process.cwd(), staticDir, 'index.html'));
 };
