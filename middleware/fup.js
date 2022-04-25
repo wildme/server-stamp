@@ -2,7 +2,6 @@ const multer = require('multer');
 const db = require('../db.js');
 
 const maxFileSize = Number(process.env.STAMP_MAX_FILESIZE) || 5000000;
-const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
 const uploadDir = String(process.env.STAMP_EXPRESS_UPLOAD_DIR) || 'files';
 
 exports.uploadFileApi = async (req, res) => {
