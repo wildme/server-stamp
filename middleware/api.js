@@ -17,16 +17,16 @@ exports.getItemsApi = async (req, res) => {
   const items = await db.getItems(box, column, order);
 
   if (!items) return res.sendStatus(500);
-  if (items.length) return res.json(items);
   if (!items.length) return res.sendStatus(204);
+  return res.json(items);
 };
 
 exports.getContactsApi = async (req, res) => {
   const contacts = await db.getContacts();
 
-  if (contacts.length) return res.json(contacts);
   if (!contacts.length) return res.sendStatus(204);
-  if (!conatcts) return res.sendStatus(500);
+  if (!contacts) return res.sendStatus(500);
+  return res.json(contacts);
 };
 
 exports.getItemByIdApi = async (req, res) => {
@@ -45,7 +45,7 @@ exports.getAttachmentByIdApi = async (req, res) => {
   const attachment = await db.getAttachmentById(box, id);
 
   if (attachment) return res.json(attachment);
-  else return res.sendStatus(204);
+  return res.sendStatus(204);
 };
 
 exports.getUserByNameApi = async (req, res) => {
@@ -53,7 +53,7 @@ exports.getUserByNameApi = async (req, res) => {
   const profile = await db.getUserByName(user);
 
   if (profile) return res.json(profile);
-  else return res.sendStatus(204);
+  return res.sendStatus(204);
 };
 
 exports.deleteAttachmentByIdApi = async (req, res) => {
