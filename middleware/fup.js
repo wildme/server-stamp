@@ -1,5 +1,4 @@
 const multer = require('multer');
-const db = require('../db.js');
 
 const maxFileSize = Number(process.env.STAMP_MAX_FILESIZE) || 5000000;
 const uploadDir = String(process.env.STAMP_EXPRESS_UPLOAD_DIR) || 'files';
@@ -13,28 +12,19 @@ exports.uploadFileApi = async (req, res) => {
   upload(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       if (err.message === 'File too large') return res.sendStatus(413);
-      return res.sendStatus(500);
     } else if (err) {
       return res.sendStatus(500);
     }
 
-    const filename = req.file.originalname;
-    const fsDirectory = req.file.destination;
-    const fsFilename = req.file.filename;
-    const size = req.file.size;
-    const type = req.file.mimetype;
-    const box = req.params.box;
-    const id = req.params.id;
-    const attach = db.addAttachment(
-      filename,
-      fsDirectory,
-      fsFilename,
-      box,
-      id,
-      size,
-      type);
+    const savedFileData = {
+      filename: req.file.originalname,
+      fsDirectory: req.file.destination,
+      fsFilename: req.file.filename,
+      size: req.file.size,
+      type: req.file.mimetype,
+      box: req.params.box
+    };
 
-    if (!attach) return res.sendStatus(500);
-    return res.sendStatus(200);
+    return res.json({...savedFileData});
   });
 };
