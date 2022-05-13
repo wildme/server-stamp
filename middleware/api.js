@@ -84,6 +84,7 @@ exports.deleteContactByIdApi = async (req, res) => {
 exports.addItemApi = async (req, res) => {
   const box = req.params.box;
   const year = new Date().getFullYear();
+  const file = req.body.uploadedFile;
   const id = await db.addItem(
     box,
     year,
@@ -95,18 +96,45 @@ exports.addItemApi = async (req, res) => {
   );
 
   if (!id) return res.sendStatus(500);
-  return res.json(id);
+  if (file) {
+    const attachment = await db.addAttachment(
+        file.filename,
+        file.fsDirectory,
+        file.fsFilename,
+        file.box,
+        id,
+        file.size,
+        file.type
+    );
+  }
+  return res.sendStatus(200);
 };
 
 exports.updateItemByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
+  const file = req.body.uploadedFile;
   const item = await db.updateItemById(
-    id, box, req.body.subject,
-    req.body.fromTo, req.body.replyTo, req.body.note
+    id,
+    box,
+    req.body.subject,
+    req.body.fromTo,
+    req.body.replyTo,
+    req.body.note
   );
 
   if (!item) return res.sendStatus(500);
+  if (file) {
+    const attachment = await db.addAttachment(
+        file.filename,
+        file.fsDirectory,
+        file.fsFilename,
+        file.box,
+        id,
+        file.size,
+        file.type
+    );
+  }
   return res.sendStatus(200);
 };
 
