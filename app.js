@@ -55,7 +55,7 @@ app.post('/api/user/update/password', api.updateUserPasswordApi);
 app.post('/api/contact/update', api.updateContactByIdApi);
 app.post('/api/reset/password', api.resetPasswordApi);
 app.post('/api/:box/new', api.addItemApi);
-app.post('/api/:box/upload/:id', fup.uploadFileApi);
+app.post('/api/:box/upload', fup.uploadFileApi);
 app.post('/api/:box/update/:id', api.updateItemByIdApi);
 app.post('/api/:box/status/:id', api.updateStatusApi);
 
