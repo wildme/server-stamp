@@ -171,8 +171,8 @@ exports.updateUserEmailApi = async (req, res) => {
 
 exports.updateUserInfoApi = async (req, res) => {
   const user = req.body.user;
-  const firstname = req.body.firstname;
-  const lastname = req.body.lastname;
+  const firstname = req.body.firstname.trim();
+  const lastname = req.body.lastname.trim();
   const info = await db.updateUserInfo(user, firstname, lastname);
 
   if (!info) return res.sendStatus(500);
