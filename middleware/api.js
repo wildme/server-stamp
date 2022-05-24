@@ -84,16 +84,16 @@ exports.deleteContactByIdApi = async (req, res) => {
 exports.addItemApi = async (req, res) => {
   const box = req.params.box;
   const year = new Date().getFullYear();
+  const addedBy = req.body.addedBy;
   const file = req.body.uploadedFile;
+  const subject = req.body.subject.trim();
+  const fromTo = req.body.fromTo.trim();
+  const replyTo = req.body.replyTo.trim();
+  const note = req.body.note.trim();
+
   const id = await db.addItem(
-    box,
-    year,
-    req.body.subject,
-    req.body.fromTo,
-    req.body.addedBy,
-    req.body.replyTo,
-    req.body.note
-  );
+    box, year, subject, fromTo, addedBy, replyTo, note
+);
 
   if (!id) return res.sendStatus(500);
   if (file) {
@@ -114,14 +114,12 @@ exports.updateItemByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
   const file = req.body.uploadedFile;
-  const item = await db.updateItemById(
-    id,
-    box,
-    req.body.subject,
-    req.body.fromTo,
-    req.body.replyTo,
-    req.body.note
-  );
+  const subject = req.body.subject.trim();
+  const fromTo = req.body.fromTo.trim();
+  const replyTo = req.body.replyTo.trim();
+  const note = req.body.note.trim();
+
+  const item = await db.updateItemById(id, box, subject, fromTo, replyTo, note);
 
   if (!item) return res.sendStatus(500);
   if (file) {
@@ -140,9 +138,9 @@ exports.updateItemByIdApi = async (req, res) => {
 
 exports.updateContactByIdApi = async (req, res) => {
   const id = req.body.id
-  const name = req.body.name;
-  const region = req.body.region;
-  const location = req.body.location;
+  const name = req.body.name.trim();
+  const region = req.body.region.trim();
+  const location = req.body.location.trim();
   const contact = await db.updateContactById(id, name, region, location);
 
   if (!contact) return res.sendStatus(500);
@@ -226,8 +224,11 @@ exports.searchContactsByNameApi = async (req, res) => {
 };
 
 exports.addContactApi = async (req, res) => {
-  const contact = await db.addContact(req.body.orgLocation,
-    req.body.orgRegion, req.body.orgName);
+  const orgName = req.body.orgName.trim();
+  const orgLocation = req.body.orgLocation.trim();
+  const orgRegion = req.body.orgRegion.trim();
+
+  const contact = await db.addContact(orgLocation, orgRegion, orgName);
 
   if (!contact) return res.sendStatus(500);
   return res.sendStatus(200);
