@@ -4,6 +4,7 @@ const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/user.js');
+const UserSettings = require('../models/userSettings.js');
 const bcrypt = require('bcrypt');
 
 const jwtAccessSecret = process.env.STAMP_JWT_ACCESS_SECRET || 'secret1';
@@ -54,6 +55,17 @@ passport.use(new LocalStrategy(
   }
 ));
 
+function getUserSettings(username) {
+  return UserSettings.findOne({username: username}, 'settings',
+    function (err, result) {
+      if (err) {
+        console.error(err);
+        return 'error';
+      }
+      if (result) return result;
+    })
+}
+
 exports.init = (app) => {
   app.use(passport.initialize());
 };
@@ -72,7 +84,7 @@ exports.loginApi = (req, res, next) => {
       return res.sendStatus(401);
     }
 
-    req.logIn(user, (err) => {
+    req.logIn(user, async (err) => {
       if (err) return next(err);
 
       const accessToken_payload = {
@@ -98,22 +110,23 @@ exports.loginApi = (req, res, next) => {
 
       const accessToken = jwt.sign(accessToken_payload, jwtAccessSecret);
       const refreshToken = undefined;
+      const { settings } =  await getUserSettings(user.username);
 
       if (!req.cookies['jwt']) {
         let refreshToken = jwt.sign(refreshToken_payload, jwtRefreshSecret);
 
         return res.status(200)
           .cookie('jwt', refreshToken, {httpOnly: true, maxAge: jwtCookieAge})
-          .json({ user: profile, token: accessToken });
+          .json({ user: profile, token: accessToken, settings: settings });
       }
 
-      return res.json({user: profile, token: accessToken});
+      return res.json({user: profile, token: accessToken, settings: settings});
       })
     })(req, res, next);
 };
 
 exports.refreshTokenApi = (req, res, next) => {
-  passport.authenticate('jwt', {session: false}, (err, user, info) => {
+  passport.authenticate('jwt', {session: false}, async (err, user, info) => {
     if (err) return next(err);
     if (!user) return res.sendStatus(401);
 
@@ -130,8 +143,9 @@ exports.refreshTokenApi = (req, res, next) => {
       email: user.email
     };
     const accessToken = jwt.sign(accessToken_payload, jwtAccessSecret);
+    const { settings } =  await getUserSettings(user.username);
 
-    return res.json({user: profile, token: accessToken});
+    return res.json({user: profile, token: accessToken, settings: settings});
   })(req, res, next);
 };
 
