@@ -197,6 +197,15 @@ exports.updateUserPasswordApi = async (req, res) => {
   return res.sendStatus(200);
 };
 
+exports.updateUserSettingsApi = async (req, res) => {
+  const username = req.body.user;
+  const newSettings = {...req.body.settings};
+  const settings = await db.updateUserSettings(username, newSettings);
+
+  if (!settings) return res.sendStatus(500);
+  return res.sendStatus(200);
+};
+
 exports.signupApi = async (req, res) => {
   const username = await db.checkUsername(req.body.username);
   const email = await db.checkEmail(req.body.email);
