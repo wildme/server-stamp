@@ -52,6 +52,7 @@ app.post('/api/contacts/new', api.addContactApi);
 app.post('/api/user/update/email', api.updateUserEmailApi);
 app.post('/api/user/update/info', api.updateUserInfoApi);
 app.post('/api/user/update/password', api.updateUserPasswordApi);
+app.post('/api/user/update/settings', api.updateUserSettingsApi);
 app.post('/api/contact/update', api.updateContactByIdApi);
 app.post('/api/reset/password', api.resetPasswordApi);
 app.post('/api/:box/new', api.addItemApi);
