@@ -26,6 +26,7 @@ const Inbox = require('./models/inbox.js');
 const Outbox = require('./models/outbox.js');
 const LastId = require('./models/lastId.js');
 const User = require('./models/user.js');
+const UserSettings = require('./models/userSettings.js');
 const Contact = require('./models/contact.js');
 const Attachment = require('./models/attachment.js');
 const Settings = require('./models/settings.js');
@@ -153,6 +154,13 @@ module.exports = {
   updateUserPassword: async (user, hash) => {
     return await User.updateOne({username: user}, {password: hash})
       .then(password => password)
+      .catch(err => {console.error(err); return null;});
+  },
+
+  updateUserSettings: async (user, settings) => {
+    return await UserSettings.updateOne(
+      {username: user}, {settings: settings}, {upsert: true})
+      .then(data => data)
       .catch(err => {console.error(err); return null;});
   },
 
