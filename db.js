@@ -265,6 +265,14 @@ module.exports = {
       .catch(err => {console.error(err); return null;});
   },
 
+  createUserSettings: async (username) => {
+    const userSettings = new UserSettings({username: username});
+
+    return await userSettings.save()
+      .then(settings => settings)
+      .catch(err => {console.error(err); return null;});
+  },
+
   getAppLanguage: async () => {
     return await Settings.findOne({}, 'language').exec()
       .then(lang => lang)
