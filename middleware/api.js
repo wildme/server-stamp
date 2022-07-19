@@ -220,10 +220,8 @@ exports.signupApi = async (req, res) => {
     req.body.lastname,
     req.body.email
   );
-  const userSettings = await db.createUserSettings(req.body.username);
 
   if (!user) return res.sendStatus(500);
-  if (!userSettings) res.sendStatus(500);
 
   return res.sendStatus(201);
 };
