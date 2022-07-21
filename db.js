@@ -1,11 +1,7 @@
 const mongoose = require('mongoose');
 const db = mongoose.connection;
 const connectionString = process.env.STAMP_MONGODB;
-const opts = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  connectTimeoutMS: 5000
-}
+const opts = {connectTimeoutMS: 5000};
 
 mongoose.connect(connectionString, opts );
 

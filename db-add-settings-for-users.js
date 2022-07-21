@@ -1,15 +1,9 @@
 const mongoose = require('mongoose');
 const User = require('./models/user.js');
-//const UserSettings = require('./models/userSettings.js');
 
 const connectionString = process.env.STAMP_MONGODB || 'mongodb://localhost:27017/stamp';
 
-mongoose.connect(connectionString,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  }
-);
+mongoose.connect(connectionString);
 const db = mongoose.connection;
 
 db.on('error', (err) => { console.error(err.message); process.exit(1); })
