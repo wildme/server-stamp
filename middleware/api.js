@@ -98,13 +98,13 @@ exports.addItemApi = async (req, res) => {
   if (!id) return res.sendStatus(500);
   if (file) {
     const attachment = await db.addAttachment(
-        file.filename,
-        file.fsDirectory,
-        file.fsFilename,
-        file.box,
-        id,
-        file.size,
-        file.type
+      file.filename,
+      file.fsDirectory,
+      file.fsFilename,
+      file.box,
+      id,
+      file.size,
+      file.type
     );
   }
   return res.sendStatus(200);
@@ -123,15 +123,16 @@ exports.updateItemByIdApi = async (req, res) => {
 
   if (!item) return res.sendStatus(500);
   if (file) {
-    const attachment = await db.addAttachment(
-        file.filename,
-        file.fsDirectory,
-        file.fsFilename,
-        file.box,
-        id,
-        file.size,
-        file.type
+    const savedFile = await db.addAttachment(
+      file.filename,
+      file.fsDirectory,
+      file.fsFilename,
+      file.box,
+      id,
+      file.size,
+      file.type
     );
+    return res.json(savedFile);
   }
   return res.sendStatus(200);
 };
