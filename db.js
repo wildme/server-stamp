@@ -18,6 +18,7 @@ db.on('error', (err) => {
 
 db.once('open', () => console.log('Connection established'));
 
+const Box = require('./models/box.js');
 const Inbox = require('./models/inbox.js');
 const Outbox = require('./models/outbox.js');
 const LastId = require('./models/lastId.js');
@@ -28,36 +29,22 @@ const Settings = require('./models/settings.js');
 
 module.exports = {
   getItems: async (box, column, order) => {
-    if (box === 'inbox') {
-      return await Inbox.find({}).sort([[column, order]])
-        .then(items => items)
-        .catch((err) => {console.error(err); return null;});
-    }
-    if (box === 'outbox') {
-      return await Outbox.find({}).sort([[column, order]])
-        .then(items => items)
-        .catch((err) => {console.error(err); return null;});
-    }
+    return await Box.find({box: box}).sort([[column, order]])
+      .then(items => items)
+      .catch((err) => {console.error(err); return null;});
   },
 
   getItemById: async (box, id) => {
-    if (box === 'inbox') {
-      return await Inbox.find({id: id}).exec()
-        .then(item => item)
-        .catch((err) => {console.error(err); return null;});
-    }
-    if (box === 'outbox') {
-      return await Outbox.find({id: id}).exec()
-        .then(item => item)
-        .catch((err) => {console.error(err); return null;});
-    }
+    return await Box.findOne({box: box, id: id},
+      'id status addr subj date updated user reply note file.name file.fsName')
+      .then(item => item)
+      .catch((err) => {console.error(err); return 'error';});
   },
 
-  getAttachmentById: async (box, id) => {
-    return await Attachment.findOne({doc: box, docId: id},
-      'filename _id').exec()
-      .then(attach => attach)
-      .catch((err) => {console.error(err);});
+  getAttachmentByName: async (id) => {
+    return await Box.findOne({'file.fsName': id}, 'file')
+      .then(file => file)
+      .catch((err) => {console.error(err); return 'error'});
   },
 
   getUserByName: async (user) => {
@@ -73,8 +60,16 @@ module.exports = {
       .catch((err) => {console.error(err); return null;});
   },
 
-  deleteAttachmentById: async (id) => {
-    return await Attachment.deleteOne({_id: id})
+  deleteAttachmentByName: async (id) => {
+    const file = {
+      name: undefined,
+      dir: undefined,
+      fsName: undefined,
+      size: undefined,
+      mime: undefined,
+      date: undefined
+    };
+    return await Box.updateOne({'file.fsName': id}, { file: file })
       .then(file => file)
       .catch((err) => {console.error(err); return null;});
   },
@@ -85,45 +80,22 @@ module.exports = {
       .catch((err) => {console.error(err); return null;});
   },
 
-  getAttachmentByFileId: async (id) => {
-    return await Attachment.findOne({_id: id},
-      'fsDirectory fsFilename filename mimeType').exec()
-      .then(file => file)
-      .catch((err) => {console.error(err);});
-  },
-
-  updateItemById: async (id, box, subject, fromTo, replyTo, note) => {
-    if (box === 'inbox') {
-      return await Inbox.updateOne({id: id}, {
-        subject: subject, from: fromTo,
-        replyTo: replyTo, note: note,
-        updated: new Date()
-      })
-        .then(item => item)
-        .catch(err => {console.error(err); return null;});
-    }
-    if (box === 'outbox') {
-      return await Outbox.updateOne({id: id}, {
-        subject: subject, to: fromTo,
-        replyTo: replyTo, note: note,
-        updated: new Date()
-      })
-        .then(item => item)
-        .catch(err => {console.error(err); return null;});
-    }
+  updateItemById: async (id, box, subj, addr, reply, note) => {
+    return await Box.updateOne({id: id, box: box}, {
+      subj: subj,
+      addr: addr,
+      reply: reply,
+      note: note,
+      updated: new Date()
+    })
+      .then(item => item)
+      .catch(err => {console.error(err); return null;});
   },
 
   updateStatus: async (box, id, status) => {
-    if (box === 'inbox') {
-      return await Inbox.updateOne({id: id}, {status: status})
-        .then(status => status)
-        .catch(err => {console.error(err); return null;});
-    }
-    if (box === 'outbox') {
-      return await Outbox.updateOne({id: id}, {status: status})
-        .then(status => status)
-        .catch(err => {console.error(err); return null;});
-    }
+    return await Inbox.updateOne({id: id, box: box}, {status: status})
+      .then(status => status)
+      .catch(err => {console.error(err); return null;});
   },
 
   updateContactById: async (id, name, region, location) => {
@@ -159,37 +131,25 @@ module.exports = {
       .catch(err => {console.error(err); return null;});
   },
 
-  addItem: async (box, year, subject, fromTo, addedBy, replyTo, note) => {
+  addItem: async (box, year, subj, addr, user, reply, note) => {
     const docForCurrentYear = await LastId.findOne({box: box, year: year});
 
     if (!(docForCurrentYear)) new LastId({box: box, year: year}).save();
 
     await LastId.updateOne({box: box, year: year}, {$inc: {lastId: 1}});
+
     const id = await LastId.findOne({box: box, year: year}, 'lastId');
     const idYearFormat = [id.lastId, year].join('-'); 
-    let doc = undefined;
-
-    if (box === 'inbox') {
-      doc = new Inbox({
-        id: idYearFormat,
-        from: fromTo,
-        subject: subject,
-        addedBy: addedBy,
-        replyTo: replyTo,
-        note: note,
-        date: new Date
+    const doc = new Box({
+      id: idYearFormat,
+      box: box,
+      addr: addr,
+      subj: subj,
+      user: user,
+      reply: reply,
+      note: note,
+      date: new Date
       });
-    }
-    if (box === 'outbox') {
-      doc = new Outbox({
-        id: idYearFormat,
-        to: fromTo,
-        subject: subject,
-        addedBy: addedBy, replyTo: replyTo,
-        note: note,
-        date: new Date
-      });
-    }
 
     return await doc.save()
       .then(record => record.id)
@@ -203,21 +163,19 @@ module.exports = {
       .catch(err => {console.error(err); return null;});
   },
 
-  addAttachment: async (filename, fsDirectory, fsFilename, box, id, size, type) => {
-    const doc = new Attachment({
-      filename: filename,
-      fsDirectory: fsDirectory,
-      fsFilename: fsFilename,
-      doc: box,
-      docId: id,
-      filesize: size,
-      date: new Date,
-      mimeType: type
-    });
-
-    return await doc.save()
-      .then(file => file)
+  addAttachment: async (name, dir, fsName, box, id, size, mime) => {
+    const file = {
+      name: name,
+      dir: dir,
+      fsName: fsName,
+      size: size,
+      mime: mime,
+      date: new Date
+    };
+    const doc = await Box.updateOne({box: box, id: id}, {file: file})
+      .then(data => data)
       .catch(err => {console.error(err); return null;});
+    return doc ? file : null;
   },
 
   searchContactsByName: async (name) => {

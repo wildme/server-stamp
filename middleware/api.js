@@ -34,18 +34,18 @@ exports.getItemByIdApi = async (req, res) => {
   const id = req.params.id;
   const item = await db.getItemById(box, id);
 
-  if (!item) return res.sendStatus(500);
-  if (!item.length) return res.sendStatus(204);
+  if (item === 'error') return res.sendStatus(500);
+  if (!item) return res.sendStatus(204);
   return res.json(item);
 };
 
-exports.getAttachmentByIdApi = async (req, res) => {
-  const box = req.params.box;
-  const id = req.params.id;
-  const attachment = await db.getAttachmentById(box, id);
-
-  if (attachment) return res.json(attachment);
-  return res.sendStatus(204);
+exports.downloadFileApi = async (req, res) => {
+  const id = req.params.file;
+  const { file } = await db.getAttachmentByName(id);
+  if (file === 'error') return res.sendStatus(500);
+  if (!file) return res.sendStatus(204);
+  const path = [file.dir, file.fsName].join('/');
+  return res.set({'Content-Type': file.mime}).download(path, file.name);
 };
 
 exports.getUserByNameApi = async (req, res) => {
@@ -56,20 +56,20 @@ exports.getUserByNameApi = async (req, res) => {
   return res.sendStatus(204);
 };
 
-exports.deleteAttachmentByIdApi = async (req, res) => {
+exports.deleteAttachmentByNameApi = async (req, res) => {
   const id = req.params.id;
-  const { fsDirectory, fsFilename } = await db.getAttachmentByFileId(id);
-  const file = await db.deleteAttachmentById(id);
+  const { file } = await db.getAttachmentByName(id);
+  const deleted = await db.deleteAttachmentByName(id);
 
-  fs.unlink(`${fsDirectory}/${fsFilename}`, (err => {
+  fs.unlink(`${file.dir}/${file.fsName}`, (err => {
     if (err) {
       console.error(err);
     } else {
-      console.log('Deleted file: ', fsFilename);
+      console.log('Deleted file: ', file.fsName);
     }
   }));
 
-  if (!file) return res.sendStatus(500);
+  if (!deleted) return res.sendStatus(500);
   return res.sendStatus(200);
 };
 
@@ -84,16 +84,14 @@ exports.deleteContactByIdApi = async (req, res) => {
 exports.addItemApi = async (req, res) => {
   const box = req.params.box;
   const year = new Date().getFullYear();
-  const addedBy = req.body.addedBy;
-  const file = req.body.uploadedFile;
-  const subject = req.body.subject.trim();
-  const fromTo = req.body.fromTo.trim();
-  const replyTo = req.body.replyTo.trim();
+  const user = req.body.addedBy;
+  const subj = req.body.subject.trim();
+  const addr = req.body.fromTo.trim();
+  const reply = req.body.replyTo.trim();
   const note = req.body.note.trim();
+  const file = req.body.uploadedFile;
 
-  const id = await db.addItem(
-    box, year, subject, fromTo, addedBy, replyTo, note
-);
+  const id = await db.addItem(box, year, subj, addr, user, reply, note);
 
   if (!id) return res.sendStatus(500);
   if (file) {
@@ -114,12 +112,12 @@ exports.updateItemByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
   const file = req.body.uploadedFile;
-  const subject = req.body.subject.trim();
-  const fromTo = req.body.fromTo.trim();
-  const replyTo = req.body.replyTo.trim();
+  const subj = req.body.subject.trim();
+  const addr = req.body.fromTo.trim();
+  const reply = req.body.replyTo.trim();
   const note = req.body.note.trim();
 
-  const item = await db.updateItemById(id, box, subject, fromTo, replyTo, note);
+  const item = await db.updateItemById(id, box, subj, addr, reply, note);
 
   if (!item) return res.sendStatus(500);
   if (file) {
@@ -194,7 +192,6 @@ exports.updateUserPasswordApi = async (req, res) => {
 
   const pass = await db.updateUserPassword(username, hash);
   if (!pass) return res.sendStatus(500);
-
   return res.sendStatus(200);
 };
 
@@ -223,14 +220,12 @@ exports.signupApi = async (req, res) => {
   );
 
   if (!user) return res.sendStatus(500);
-
   return res.sendStatus(201);
 };
 
 exports.searchContactsByNameApi = async (req, res) => {
   const name = req.query.name;
   const contacts = await db.searchContactsByName(name);
-
   return res.json(contacts);
 };
 
@@ -243,15 +238,6 @@ exports.addContactApi = async (req, res) => {
 
   if (!contact) return res.sendStatus(500);
   return res.sendStatus(200);
-};
-
-exports.downloadFileApi = async (req, res) => {
-  const id = req.params.file;
-  const { fsDirectory, fsFilename, filename, mimeType } =
-    await db.getAttachmentByFileId(id);
-  const path = [fsDirectory, fsFilename].join('/');
-
-  return res.set({'Content-Type': mimeType}).download(path, filename);
 };
 
 exports.getAppLanguageApi = async (req, res) => {
@@ -288,6 +274,5 @@ exports.resetPasswordApi = async (req, res) => {
   if (!emailSent) {
     return res.status(500).json({error: 'Cannot send email'});
   }
-
   return res.sendStatus(200);
 };
