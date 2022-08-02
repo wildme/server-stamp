@@ -19,12 +19,9 @@ db.on('error', (err) => {
 db.once('open', () => console.log('Connection established'));
 
 const Box = require('./models/box.js');
-const Inbox = require('./models/inbox.js');
-const Outbox = require('./models/outbox.js');
 const LastId = require('./models/lastId.js');
 const User = require('./models/user.js');
 const Contact = require('./models/contact.js');
-const Attachment = require('./models/attachment.js');
 const Settings = require('./models/settings.js');
 
 module.exports = {
