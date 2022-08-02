@@ -90,7 +90,7 @@ module.exports = {
   },
 
   updateStatus: async (box, id, status) => {
-    return await Inbox.updateOne({id: id, box: box}, {status: status})
+    return await Box.updateOne({id: id, box: box}, {status: status})
       .then(status => status)
       .catch(err => {console.error(err); return null;});
   },
