@@ -45,8 +45,7 @@ module.exports = {
   },
 
   getUserByName: async (user) => {
-    return await User.findOne({username: user},
-      'firstname lastname email').exec()
+    return await User.findOne({username: user}, 'firstname lastname email')
       .then(user => user)
       .catch((err) => {console.error(err);});
   },
@@ -178,25 +177,25 @@ module.exports = {
   searchContactsByName: async (name) => {
     const escSpecChars = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regexp  = new RegExp(escSpecChars, "i");
-    return await Contact.find({name: regexp}, 'name location').exec()
+    return await Contact.find({name: regexp}, 'name location')
       .then(contacts => contacts)
       .catch((err) => {console.error(err);});
   },
 
   checkUsername: async (username) => {
-    return await User.findOne({username: username}, 'username').exec()
+    return await User.findOne({username: username}, 'username')
       .then(user => user)
       .catch((err) => {console.error(err);});
   },
 
   checkEmail: async (email) => {
-    return await User.findOne({email: email}, 'email').exec()
+    return await User.findOne({email: email}, 'email')
       .then(email => email)
       .catch((err) => {console.error(err);});
   },
 
   checkPass: async (user, password) => {
-    return await User.findOne({username: user}, 'password').exec()
+    return await User.findOne({username: user}, 'password')
       .then(pass => pass)
       .catch((err) => {console.error(err);});
   },
@@ -216,7 +215,7 @@ module.exports = {
   },
 
   getAppLanguage: async () => {
-    return await Settings.findOne({}, 'language').exec()
+    return await Settings.findOne({}, 'language')
       .then(lang => lang)
       .catch((err) => {console.error(err);});
   }
