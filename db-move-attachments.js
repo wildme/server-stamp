@@ -26,8 +26,7 @@ db.once('open', () => { console.log('Connection established'); });
           mime: file.mimeType,
           date: file.date
         }
-      },
-      {upsert: true}
+      }
     );
   }
   db.close();
