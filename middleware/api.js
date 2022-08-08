@@ -33,7 +33,10 @@ exports.getItemByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
   const item = await db.getItemById(box, id);
-
+  const {firstname, lastname} = await db.getUserByName(item.user);
+  if (firstname && lastname) {
+    item.user = [firstname, lastname].join(' ');
+  }
   if (item === 'error') return res.sendStatus(500);
   if (!item) return res.sendStatus(204);
   return res.json(item);
