@@ -9,8 +9,6 @@ db.on('error', (err) => { console.error(err.message); process.exit(1); })
   .on('close', () => console.log('Connection closed'));
 db.once('open', () => console.log('Connection established'));
 
-const Inbox = require('./models/inbox.js');
-const Outbox = require('./models/outbox.js');
 const LastId = require('./models/lastId.js');
 const User = require('./models/user.js');
 const Settings = require('./models/settings.js');
