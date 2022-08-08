@@ -130,7 +130,7 @@ module.exports = {
   addItem: async (box, year, subj, addr, user, reply, note) => {
     const docForCurrentYear = await LastId.findOne({box: box, year: year});
 
-    if (!(docForCurrentYear)) new LastId({box: box, year: year}).save();
+    if (!(docForCurrentYear)) await new LastId({box: box, year: year}).save();
 
     await LastId.updateOne({box: box, year: year}, {$inc: {lastId: 1}});
 
