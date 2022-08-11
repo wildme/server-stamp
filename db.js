@@ -128,8 +128,10 @@ module.exports = {
   },
 
   addItem: async (box, year, subj, addr, user, reply, note) => {
-    const incId = await LastId.updateOne({box: box, year: year}, {$inc: {lastId: 1}}, {upsert: true});
-    const { lastId } = await LastId.findOne({box: box, year: year}, 'lastId');
+    const query = {box: box, year: year};
+    const update = {$inc: {lastId: 1}};
+    const opts = {upsert: true, new: true};
+    const { lastId } = await LastId.findOneAndUpdate(query, update, opts);
     const id = [lastId, year].join('-');
     const doc = new Box({
       id: id,
