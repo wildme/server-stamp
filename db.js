@@ -128,16 +128,11 @@ module.exports = {
   },
 
   addItem: async (box, year, subj, addr, user, reply, note) => {
-    const docForCurrentYear = await LastId.findOne({box: box, year: year});
-
-    if (!(docForCurrentYear)) await new LastId({box: box, year: year}).save();
-
-    await LastId.updateOne({box: box, year: year}, {$inc: {lastId: 1}});
-
-    const id = await LastId.findOne({box: box, year: year}, 'lastId');
-    const idYearFormat = [id.lastId, year].join('-'); 
+    const incId = await LastId.updateOne({box: box, year: year}, {$inc: {lastId: 1}}, {upsert: true});
+    const { lastId } = await LastId.findOne({box: box, year: year}, 'lastId');
+    const id = [lastId, year].join('-');
     const doc = new Box({
-      id: idYearFormat,
+      id: id,
       box: box,
       addr: addr,
       subj: subj,
@@ -145,7 +140,7 @@ module.exports = {
       reply: reply,
       note: note,
       date: new Date
-      });
+    });
 
     return await doc.save()
       .then(record => record.id)
