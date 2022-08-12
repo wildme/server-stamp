@@ -139,7 +139,7 @@ exports.updateItemByIdApi = async (req, res) => {
 };
 
 exports.updateContactByIdApi = async (req, res) => {
-  const id = req.body.id
+  const id = req.params.id
   const name = req.body.name.trim();
   const region = req.body.region.trim();
   const location = req.body.location.trim();
