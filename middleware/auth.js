@@ -138,14 +138,15 @@ exports.refreshTokenApi = (req, res, next) => {
 };
 
 exports.verifyTokenApi = (req, res) => {
-  jwt.verify(req.body.token, jwtAccessSecret, (err, decoded) => {
+  const token = req.get('Authorization');
+  jwt.verify(token, jwtAccessSecret, (err, decoded) => {
     if (err) {
       if (err.message === 'jwt expired') {
         return res.sendStatus(401);
       }
-      return res.sendStatus(401);
-    } else {
-      return res.sendStatus(200);
+      console.log(err);
+      return res.sendStatus(500);
     }
+    return res.sendStatus(200);
   });
 };
