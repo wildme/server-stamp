@@ -138,8 +138,8 @@ exports.refreshTokenApi = (req, res, next) => {
 };
 
 exports.verifyTokenApi = (req, res) => {
-  const token = req.get('Authorization');
-  jwt.verify(token, jwtAccessSecret, (err, decoded) => {
+  const token = req.get('Authorization').split(' ');
+  jwt.verify(token[1], jwtAccessSecret, (err, decoded) => {
     if (err) {
       if (err.message === 'jwt expired') {
         return res.sendStatus(401);
