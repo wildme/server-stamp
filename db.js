@@ -33,7 +33,7 @@ module.exports = {
 
   getItemById: async (box, id) => {
     return await Box.findOne({box: box, id: id},
-      'id status addr subj date updated user reply note file.name file.fsName')
+      'id status addr subj date updated user reply note file.name file.fsName').lean()
       .then(item => item)
       .catch((err) => {console.error(err); return 'error';});
   },
