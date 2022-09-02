@@ -44,6 +44,12 @@ module.exports = {
       .catch((err) => {console.error(err); return 'error'});
   },
 
+  getUserById: async (id) => {
+    return await User.findById(id)
+      .then(user => user)
+      .catch((err) => {console.error(err);});
+  },
+
   getUserByName: async (user) => {
     return await User.findOne({username: user}, 'firstname lastname email')
       .then(user => user)
