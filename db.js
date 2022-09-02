@@ -63,15 +63,8 @@ module.exports = {
   },
 
   deleteAttachmentByName: async (id) => {
-    const file = {
-      name: undefined,
-      dir: undefined,
-      fsName: undefined,
-      size: undefined,
-      mime: undefined,
-      date: undefined
-    };
-    return await Box.updateOne({'file.fsName': id}, { file: file })
+    // test this code
+    return await Box.updateOne({'file.fsName': id}, { file: undefined })
       .then(file => file)
       .catch((err) => {console.error(err); return null;});
   },
