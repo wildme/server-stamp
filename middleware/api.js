@@ -43,7 +43,24 @@ exports.getItemByIdApi = async (req, res) => {
   if (!item) return res.sendStatus(204);
   const {firstname, lastname} = await db.getUserByName(item.user);
   item.fullname = [firstname, lastname].join(' ');
-  return res.json(item);
+  if (req.token) {
+    return res.json({record: item, token: req.token});
+  }
+  return res.json({record: item});
+};
+
+exports.fetchItemByIdApi = async (req, res) => {
+  const box = req.params.box;
+  const id = req.params.id;
+  const item = await db.getItemById(box, id);
+  const permitted = req.user.administrator || req.user.username === item.user;
+  if (!permitted) return res.sendStatus(403);
+  if (item === 'error') return res.sendStatus(500);
+  if (!item) return res.sendStatus(204);
+  if (req.token) {
+    return res.json({record: item, token: req.token});
+  }
+  return res.json({record: item});
 };
 
 exports.downloadFileApi = async (req, res) => {
@@ -52,6 +69,13 @@ exports.downloadFileApi = async (req, res) => {
   if (file === 'error') return res.sendStatus(500);
   if (!file) return res.sendStatus(204);
   const path = [file.dir, file.fsName].join('/');
+  // check this code
+  if (req.token) {
+    return res
+      .set({'Content-Type': file.mime, 'Token': req.token})
+      .download(path, file.name)
+      .json({token: req.token});
+  }
   return res.set({'Content-Type': file.mime}).download(path, file.name);
 };
 
