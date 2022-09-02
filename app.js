@@ -5,7 +5,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const { mkdir, access, constants } = require('fs');
 const api = require('./middleware/api.js');
-const auth = require('./middleware/auth.js');
+const login = require('./middleware/login.js');
+const token = require('./middleware/token.js');
 const fup = require('./middleware/fup.js');
 
 const app = express();
@@ -29,21 +30,19 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(cookieparser());
 
-auth.init(app);
+login.init(app);
 
-app.get('/api/verify/token', auth.verifyTokenApi);
-app.get('/api/refresh/token', auth.refreshTokenApi);
-app.get('/api/logout', auth.logoutApi);
-app.get('/api/token', auth.refreshTokenApi);
+app.get('/api/refresh/token', login.refreshTokenApi);
+app.get('/api/logout', login.logoutApi);
 app.get('/api/contacts', api.getContactsApi);
-app.get('/api/contacts/search/by-name', api.searchContactsByNameApi);
+app.get('/api/contacts/search/by-name', token.authenticate, api.searchContactsApi);
 app.get('/api/download/:file', api.downloadFileApi);
 app.get('/api/user/:user', api.getUserByNameApi);
 app.get('/api/get/language', api.getAppLanguageApi);
-app.get('/api/:box', api.getItemsApi);
+app.get('/api/:box', token.authenticate, api.getItemsApi);
 app.get('/api/:box/:id', api.getItemByIdApi);
 app.get('/*', api.getReactIndex);
-app.post('/api/login', auth.loginApi);
+app.post('/api/login', login.loginApi);
 app.post('/api/signup', api.signupApi);
 app.post('/api/contacts/new', api.addContactApi);
 app.post('/api/reset/password', api.resetPasswordApi);
