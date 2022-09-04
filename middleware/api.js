@@ -147,6 +147,10 @@ exports.updateItemByIdApi = async (req, res) => {
   const addr = req.body.fromTo.trim();
   const reply = req.body.replyTo.trim();
   const note = req.body.note.trim();
+  const owner = req.body.owner;
+
+  const permitted = req.user.administrator || req.user.username === owner;
+  if (!permitted) return res.sendStatus(403);
 
   const item = await db.updateItemById(id, box, subj, addr, reply, note);
 
@@ -161,8 +165,10 @@ exports.updateItemByIdApi = async (req, res) => {
       file.size,
       file.type
     );
-    return res.json(savedFile);
+    if (req.token) return res.json({newFile: savedFile, token: req.token});
+    return res.json({newFile: savedFile});
   }
+  if (req.token) return res.set({'Token': req.token}).sendStatus(200);
   return res.sendStatus(200);
 };
 
