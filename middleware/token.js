@@ -4,7 +4,7 @@ exports.authenticate = async function(req, res, next) {
   const accessToken = req.get('Authorization').split(' ')[1];
   if (!accessToken) return res.sendStatus(401);
 
-  const refreshToken = req.cookies?.jwt;
+  const refreshToken = req.cookies.jwt || null;
   let newToken = undefined;
   const tokenCheck = jwt.verifyToken(accessToken);
 
