@@ -55,7 +55,7 @@ app.post('/api/:box/new', api.addItemApi);
 app.post('/api/:box/upload', fup.uploadFileApi);
 app.put('/api/contact/update/:id', api.updateContactByIdApi);
 app.put('/api/:box/status/:id', api.updateStatusApi);
-app.put('/api/:box/update/:id', api.updateItemByIdApi);
+app.put('/api/:box/update/:id', token.authenticate, api.updateItemByIdApi);
 app.delete('/api/attachment/delete/:id', api.deleteAttachmentByNameApi);
 app.delete('/api/contact/delete/:id', api.deleteContactByIdApi);
 
