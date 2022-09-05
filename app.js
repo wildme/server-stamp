@@ -34,7 +34,7 @@ login.init(app);
 
 app.get('/api/refresh/token', login.refreshTokenApi);
 app.get('/api/logout', login.logoutApi);
-app.get('/api/contacts', api.getContactsApi);
+app.get('/api/contacts', token.authenticate, api.getContactsApi);
 app.get('/api/contacts/search/by-name', token.authenticate, api.searchContactsApi);
 app.get('/api/download/:file', token.authenticate, api.downloadFileApi);
 app.get('/api/user/:user', api.getUserByNameApi);
@@ -45,7 +45,7 @@ app.get('/api/view/:box/:id', token.authenticate, api.getItemByIdApi);
 app.get('/*', api.getReactIndex);
 app.post('/api/login', login.loginApi);
 app.post('/api/signup', api.signupApi);
-app.post('/api/contacts/new', api.addContactApi);
+app.post('/api/contacts/new', token.authenticate, api.addContactApi);
 app.post('/api/reset/password', api.resetPasswordApi);
 app.post('/api/user/update/settings', api.updateUserSettingsApi);
 app.post('/api/user/update/info', api.updateUserInfoApi);
@@ -53,11 +53,11 @@ app.post('/api/user/update/email', api.updateUserEmailApi);
 app.post('/api/user/update/password', api.updateUserPasswordApi);
 app.post('/api/:box/new', api.addItemApi);
 app.post('/api/:box/upload', token.authenticate, fup.uploadFileApi);
-app.put('/api/contact/update/:id', api.updateContactByIdApi);
-app.put('/api/:box/status/:id', api.updateStatusApi);
+app.put('/api/contact/update/:id', token.authenticate, api.updateContactByIdApi);
+app.put('/api/:box/status/:id', token.authenticate, api.updateStatusApi);
 app.put('/api/:box/update/:id', token.authenticate, api.updateItemByIdApi);
 app.delete('/api/attachment/delete/:id', token.authenticate, api.deleteAttachmentByNameApi);
-app.delete('/api/contact/delete/:id', api.deleteContactByIdApi);
+app.delete('/api/contact/delete/:id', token.authenticate, api.deleteContactByIdApi);
 
 app.listen(port, () => {
   console.log(`Express is running on port ${port}`)
