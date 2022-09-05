@@ -53,10 +53,16 @@ exports.fetchItemByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
   const item = await db.getItemById(box, id);
-  const permitted = req.user.administrator || req.user.username === item.user;
-  if (!permitted) return res.sendStatus(403);
-  if (item === 'error') return res.sendStatus(500);
-  if (!item) return res.sendStatus(204);
+  const permitted = req.user.administrator || (req.user.username === item.user);
+  if (!permitted) {
+    return res.sendStatus(403);
+  }
+  if (item === 'error') {
+    return res.sendStatus(500);
+  }
+  if (!item) {
+    return res.sendStatus(204);
+  }
   if (req.token) {
     return res.json({record: item, token: req.token});
   }
@@ -66,15 +72,15 @@ exports.fetchItemByIdApi = async (req, res) => {
 exports.downloadFileApi = async (req, res) => {
   const id = req.params.file;
   const { file } = await db.getAttachmentByName(id);
-  if (file === 'error') return res.sendStatus(500);
-  if (!file) return res.sendStatus(204);
+  if (file === 'error') {
+    return res.sendStatus(500);
+  }
+  if (!file) {
+    return res.sendStatus(204);
+  }
   const path = [file.dir, file.fsName].join('/');
-  // check this code
   if (req.token) {
-    return res
-      .set({'Content-Type': file.mime, 'Token': req.token})
-      .download(path, file.name)
-      .json({token: req.token});
+    res.token = req.token;
   }
   return res.set({'Content-Type': file.mime}).download(path, file.name);
 };
@@ -89,9 +95,16 @@ exports.getUserByNameApi = async (req, res) => {
 
 exports.deleteAttachmentByNameApi = async (req, res) => {
   const id = req.params.id;
-  const { file } = await db.getAttachmentByName(id);
-  const deleted = await db.deleteAttachmentByName(id);
+  const { user, file } = await db.getAttachmentByName(id);
 
+  const permitted = req.user.administrator || (req.user.username === user);
+  if (!permitted) {
+    return res.sendStatus(403);
+  }
+  const deleted = await db.deleteAttachmentByName(id);
+  if (!deleted) {
+    return res.sendStatus(500);
+  }
   fs.unlink(`${file.dir}/${file.fsName}`, (err => {
     if (err) {
       console.error(err);
@@ -99,8 +112,9 @@ exports.deleteAttachmentByNameApi = async (req, res) => {
       console.log('Deleted file: ', file.fsName);
     }
   }));
-
-  if (!deleted) return res.sendStatus(500);
+  if (req.token) {
+    res.token = req.token;
+  }
   return res.sendStatus(200);
 };
 
@@ -148,15 +162,22 @@ exports.updateItemByIdApi = async (req, res) => {
   const reply = req.body.replyTo.trim();
   const note = req.body.note.trim();
   const owner = req.body.owner;
+  let update = {};
 
-  const permitted = req.user.administrator || req.user.username === owner;
-  if (!permitted) return res.sendStatus(403);
+  const permitted = req.user.administrator || (req.user.username === owner);
+  if (!permitted) {
+    return res.sendStatus(403);
+  }
 
   const item = await db.updateItemById(id, box, subj, addr, reply, note);
-
-  if (!item) return res.sendStatus(500);
+  if (!item) {
+    return res.sendStatus(500);
+  }
+  if (req.token) {
+    update.token = req.token;
+  }
   if (file) {
-    const savedFile = await db.addAttachment(
+    update.newFile = await db.addAttachment(
       file.filename,
       file.fsDirectory,
       file.fsFilename,
@@ -165,10 +186,8 @@ exports.updateItemByIdApi = async (req, res) => {
       file.size,
       file.type
     );
-    if (req.token) return res.json({newFile: savedFile, token: req.token});
-    return res.json({newFile: savedFile});
   }
-  if (req.token) return res.set({'Token': req.token}).sendStatus(200);
+  if (update.newFile || update.token) return res.json({...update});
   return res.sendStatus(200);
 };
 
