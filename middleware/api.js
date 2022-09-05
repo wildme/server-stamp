@@ -27,8 +27,12 @@ exports.getItemsApi = async (req, res) => {
 exports.getContactsApi = async (req, res) => {
   const contacts = await db.getContacts();
 
-  if (!contacts.length) return res.sendStatus(204);
-  if (!contacts) return res.sendStatus(500);
+  if (!contacts.length) {
+    return res.sendStatus(204);
+  }
+  if (!contacts) {
+    return res.sendStatus(500);
+  }
   if (req.token) {
     return res.json({contacts: items, token: req.token});
   }
@@ -39,8 +43,12 @@ exports.getItemByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
   const item = await db.getItemById(box, id);
-  if (item === 'error') return res.sendStatus(500);
-  if (!item) return res.sendStatus(204);
+  if (item === 'error') {
+    return res.sendStatus(500);
+  }
+  if (!item) {
+    return res.sendStatus(204);
+  }
   const {firstname, lastname} = await db.getUserByName(item.user);
   item.fullname = [firstname, lastname].join(' ');
   if (req.token) {
@@ -122,7 +130,12 @@ exports.deleteContactByIdApi = async (req, res) => {
   const id = req.params.id;
   const contact = await db.deleteContactById(id);
 
-  if (!contact) return res.sendStatus(500);
+  if (!contact) {
+    return res.sendStatus(500);
+  }
+  if (req.token) {
+    res.token = req.token;
+  }
   return res.sendStatus(200);
 };
 
@@ -198,7 +211,12 @@ exports.updateContactByIdApi = async (req, res) => {
   const location = req.body.location.trim();
   const contact = await db.updateContactById(id, name, region, location);
 
-  if (!contact) return res.sendStatus(500);
+  if (!contact) {
+    return res.sendStatus(500);
+  }
+  if (req.token) {
+    res.token = req.token;
+  }
   return res.sendStatus(200);
 };
 
@@ -206,9 +224,18 @@ exports.updateStatusApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id
   const status = req.body.newStatus;
+  const owner = req.body.owner;
+  const permitted = req.user.administrator || (req.user.username === owner);
+  if (!permitted) {
+    return res.sendStatus(403);
+  }
   const itemStatus = await db.updateStatus(box, id, status);
-
-  if (!itemStatus) return res.sendStatus(500);
+  if (!itemStatus) {
+    return res.sendStatus(500);
+  }
+  if (req.token) {
+    res.token = req.token;
+  }
   return res.sendStatus(200);
 };
 
