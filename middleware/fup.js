@@ -16,7 +16,7 @@ exports.uploadFileApi = async (req, res) => {
       return res.sendStatus(500);
     }
 
-    const savedFileData = {
+    const file = {
       filename: req.file.originalname,
       fsDirectory: req.file.destination,
       fsFilename: req.file.filename,
@@ -25,6 +25,9 @@ exports.uploadFileApi = async (req, res) => {
       box: req.params.box
     };
 
-    return res.json({...savedFileData});
+    if (req.token) {
+      return res.json({file: file, token: req.token});
+  }
+    return res.json({file: file});
   });
 };
