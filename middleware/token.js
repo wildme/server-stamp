@@ -19,8 +19,8 @@ exports.authenticate = async function(req, res, next) {
   if (newToken) { 
     req.token = newToken.string;
     req.user = newToken.user;
-    next();
+    return next();
   }
   req.user = tokenCheck;
-  next();
+  return next();
 }
