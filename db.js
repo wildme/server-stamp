@@ -39,8 +39,8 @@ module.exports = {
   },
 
   getAttachmentByName: async (id) => {
-    return await Box.findOne({'file.fsName': id}, 'file')
-      .then(file => file)
+    return await Box.findOne({'file.fsName': id}, 'user file')
+      .then(data => data)
       .catch((err) => {console.error(err); return 'error'});
   },
 
@@ -63,9 +63,8 @@ module.exports = {
   },
 
   deleteAttachmentByName: async (id) => {
-    // test this code
-    return await Box.updateOne({'file.fsName': id}, { file: undefined })
-      .then(file => file)
+    return await Box.updateOne({'file.fsName': id}, { $unset: { file: true }})
+      .then(data => data)
       .catch((err) => {console.error(err); return null;});
   },
 
