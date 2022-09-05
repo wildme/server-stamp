@@ -52,11 +52,11 @@ app.post('/api/user/update/info', api.updateUserInfoApi);
 app.post('/api/user/update/email', api.updateUserEmailApi);
 app.post('/api/user/update/password', api.updateUserPasswordApi);
 app.post('/api/:box/new', api.addItemApi);
-app.post('/api/:box/upload', fup.uploadFileApi);
+app.post('/api/:box/upload', token.authenticate, fup.uploadFileApi);
 app.put('/api/contact/update/:id', api.updateContactByIdApi);
 app.put('/api/:box/status/:id', api.updateStatusApi);
 app.put('/api/:box/update/:id', token.authenticate, api.updateItemByIdApi);
-app.delete('/api/attachment/delete/:id', api.deleteAttachmentByNameApi);
+app.delete('/api/attachment/delete/:id', token.authenticate, api.deleteAttachmentByNameApi);
 app.delete('/api/contact/delete/:id', api.deleteContactByIdApi);
 
 app.listen(port, () => {
