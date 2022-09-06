@@ -34,7 +34,7 @@ exports.getContactsApi = async (req, res) => {
     return res.sendStatus(500);
   }
   if (req.token) {
-    return res.json({contacts: items, token: req.token});
+    return res.json({contacts: contacts, token: req.token});
   }
   return res.json({contacts: contacts});
 };
@@ -162,6 +162,9 @@ exports.addItemApi = async (req, res) => {
       file.size,
       file.type
     );
+  }
+  if (req.token) {
+    res.token = req.token;
   }
   return res.sendStatus(200);
 };
@@ -309,7 +312,13 @@ exports.signupApi = async (req, res) => {
 exports.searchContactsApi = async (req, res) => {
   const name = req.query.name;
   const contacts = await db.searchContactsByName(name);
-  return res.json(contacts);
+  if (!contacts) {
+    return res.sendStatus(500);
+  }
+  if (req.token) {
+    return res.json({contacts: contacts, token: req.token});
+  }
+  return res.json({contacts: contacts});
 };
 
 exports.addContactApi = async (req, res) => {
@@ -318,8 +327,12 @@ exports.addContactApi = async (req, res) => {
   const orgRegion = req.body.orgRegion.trim();
 
   const contact = await db.addContact(orgLocation, orgRegion, orgName);
-
-  if (!contact) return res.sendStatus(500);
+  if (!contact) {
+    return res.sendStatus(500);
+  }
+  if (req.token) {
+    res.token = req.token;
+  }
   return res.sendStatus(200);
 };
 
