@@ -51,7 +51,7 @@ app.post('/api/user/update/settings', api.updateUserSettingsApi);
 app.post('/api/user/update/info', api.updateUserInfoApi);
 app.post('/api/user/update/email', api.updateUserEmailApi);
 app.post('/api/user/update/password', api.updateUserPasswordApi);
-app.post('/api/:box/new', api.addItemApi);
+app.post('/api/:box/new', token.authenticate, api.addItemApi);
 app.post('/api/:box/upload', token.authenticate, fup.uploadFileApi);
 app.put('/api/contact/update/:id', token.authenticate, api.updateContactByIdApi);
 app.put('/api/:box/status/:id', token.authenticate, api.updateStatusApi);
