@@ -49,7 +49,7 @@ exports.getItemByIdApi = async (req, res) => {
   if (!item) {
     return res.sendStatus(204);
   }
-  const {firstname, lastname} = await db.getUserByName(item.user);
+  const {firstname, lastname} = await db.getUserFullname(item.user);
   item.fullname = [firstname, lastname].join(' ');
   if (req.token) {
     return res.json({record: item, token: req.token});
@@ -91,14 +91,6 @@ exports.downloadFileApi = async (req, res) => {
     res.token = req.token;
   }
   return res.set({'Content-Type': file.mime}).download(path, file.name);
-};
-
-exports.getUserByNameApi = async (req, res) => {
-  const user = req.params.user;
-  const profile = await db.getUserByName(user);
-
-  if (profile) return res.json(profile);
-  return res.sendStatus(204);
 };
 
 exports.deleteAttachmentByNameApi = async (req, res) => {
