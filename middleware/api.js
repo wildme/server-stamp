@@ -229,6 +229,7 @@ exports.updateStatusApi = async (req, res) => {
   const status = req.body.newStatus;
   const owner = req.body.owner;
   const permitted = req.user.administrator || (req.user.username === owner);
+
   if (!permitted) {
     return res.sendStatus(403);
   }
@@ -247,10 +248,17 @@ exports.updateUserEmailApi = async (req, res) => {
   const email = req.body.email;
   const emailExists = await db.checkEmail(email);
 
-  if (emailExists) return res.sendStatus(409);
-  const emailUpdate = await db.updateUserEmail(user, email);
+  if (emailExists) {
+    return res.sendStatus(409);
+  }
 
-  if (!emailUpdate) return res.sendStatus(500);
+  const emailUpdate = await db.updateUserEmail(user, email);
+  if (!emailUpdate) {
+    return res.sendStatus(500);
+  }
+  if (req.token) {
+    res.token = req.token;
+  }
   return res.sendStatus(200);
 };
 
@@ -260,7 +268,12 @@ exports.updateUserInfoApi = async (req, res) => {
   const lastname = req.body.lastname.trim();
   const info = await db.updateUserInfo(user, firstname, lastname);
 
-  if (!info) return res.sendStatus(500);
+  if (!info) {
+    return res.sendStatus(500);
+  }
+  if (req.token) {
+    res.token = req.token;
+  }
   return res.sendStatus(200);
 };
 
@@ -271,13 +284,20 @@ exports.updateUserPasswordApi = async (req, res) => {
   const { password } = await db.checkPass(username, oldPass);
   const checkPass = await hashpass.cmpHash(oldPass, password);
 
-  if (!checkPass) return res.sendStatus(409);
-
+  if (!checkPass) {
+    return res.sendStatus(409);
+  }
   const hash = await hashpass.getHashOfPass(newPass, username);
-  if (!hash) return res.sendStatus(500);
-
+  if (!hash) {
+    return res.sendStatus(500);
+  }
   const pass = await db.updateUserPassword(username, hash);
-  if (!pass) return res.sendStatus(500);
+  if (!pass) {
+    return res.sendStatus(500);
+  }
+  if (req.token) {
+    res.token = req.token;
+  }
   return res.sendStatus(200);
 };
 
@@ -286,7 +306,12 @@ exports.updateUserSettingsApi = async (req, res) => {
   const newSettings = {...req.body.settings};
   const settings = await db.updateUserSettings(username, newSettings);
 
-  if (!settings) return res.sendStatus(500);
+  if (!settings) {
+    return res.sendStatus(500);
+  }
+  if (req.token) {
+    res.token = req.token;
+  }
   return res.sendStatus(200);
 };
 
