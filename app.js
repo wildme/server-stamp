@@ -37,7 +37,6 @@ app.get('/api/logout', login.logoutApi);
 app.get('/api/contacts', token.authenticate, api.getContactsApi);
 app.get('/api/contacts/search/by-name', token.authenticate, api.searchContactsApi);
 app.get('/api/download/:file', token.authenticate, api.downloadFileApi);
-app.get('/api/user/:user', api.getUserByNameApi);
 app.get('/api/get/language', api.getAppLanguageApi);
 app.get('/api/:box', token.authenticate, api.getItemsApi);
 app.get('/api/edit/:box/:id', token.authenticate, api.fetchItemByIdApi);
