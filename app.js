@@ -7,7 +7,7 @@ const { mkdir, access, constants } = require('fs');
 const api = require('./middleware/api.js');
 const login = require('./middleware/login.js');
 const token = require('./middleware/token.js');
-const fup = require('./middleware/fup.js');
+const getFile = require('./middleware/file-upload.js');
 
 const app = express();
 const port = Number(process.env.STAMP_EXPRESS_PORT) || 3000;
@@ -51,7 +51,7 @@ app.post('/api/user/update/info', token.authenticate, api.updateUserInfoApi);
 app.post('/api/user/update/email', token.authenticate, api.updateUserEmailApi);
 app.post('/api/user/update/password', token.authenticate, api.updateUserPasswordApi);
 app.post('/api/:box/new', token.authenticate, api.addItemApi);
-app.post('/api/:box/upload', token.authenticate, fup.uploadFileApi);
+app.post('/api/:box/upload', token.authenticate, getFile.uploadFileApi);
 app.put('/api/contact/update/:id', token.authenticate, api.updateContactByIdApi);
 app.put('/api/:box/status/:id', token.authenticate, api.updateStatusApi);
 app.put('/api/:box/update/:id', token.authenticate, api.updateItemByIdApi);
