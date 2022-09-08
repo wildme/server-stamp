@@ -12,7 +12,7 @@ exports.getReactIndex = async (req, res) => {
 
 exports.getItemsApi = async (req, res) => {
   const box = req.params.box;
-  const column = req.query.field || 'id';
+  const column = req.query.column || 'id';
   const order = req.query.order || 'asc';
   const items = await db.getItems(box, column, order);
 
