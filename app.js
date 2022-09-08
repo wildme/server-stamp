@@ -32,7 +32,7 @@ app.use(cookieparser());
 
 login.init(app);
 
-app.get('/api/refresh/token', login.refreshTokenApi);
+app.get('/api/page-reload', token.onPageReload);
 app.get('/api/logout', login.logoutApi);
 app.get('/api/contacts', token.authenticate, api.getContactsApi);
 app.get('/api/contacts/search/by-name', token.authenticate, api.searchContactsApi);
