@@ -11,7 +11,9 @@ exports.uploadFileApi = async (req, res) => {
 
   upload(req, res, (err) => {
     if (err instanceof multer.MulterError) {
-      if (err.message === 'File too large') return res.sendStatus(413);
+      if (err.message === 'File too large') {
+        return res.sendStatus(413);
+      }
     } else if (err) {
       return res.sendStatus(500);
     }
