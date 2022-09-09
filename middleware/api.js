@@ -134,12 +134,12 @@ exports.deleteContactByIdApi = async (req, res) => {
 exports.addItemApi = async (req, res) => {
   const box = req.params.box;
   const year = new Date().getFullYear();
-  const user = req.body.addedBy;
+  const user = req.body.user;
   const subj = req.body.subject.trim();
   const addr = req.body.fromTo.trim();
   const reply = req.body.replyTo.trim();
   const note = req.body.note.trim();
-  const file = req.body.uploadedFile;
+  const file = req.body.fileProps;
 
   const id = await db.addItem(box, year, subj, addr, user, reply, note);
 
@@ -156,20 +156,20 @@ exports.addItemApi = async (req, res) => {
     );
   }
   if (req.token) {
-    res.token = req.token;
+    return res.json({id: id, token: req.token});
   }
-  return res.sendStatus(200);
+  return res.json(id);
 };
 
 exports.updateItemByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
-  const file = req.body.uploadedFile;
+  const owner = req.body.owner;
   const subj = req.body.subject.trim();
   const addr = req.body.fromTo.trim();
   const reply = req.body.replyTo.trim();
   const note = req.body.note.trim();
-  const owner = req.body.owner;
+  const file = req.body.fileProps;
   let update = {};
 
   const permitted = req.user.administrator || (req.user.username === owner);
