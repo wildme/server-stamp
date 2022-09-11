@@ -158,7 +158,7 @@ exports.addItemApi = async (req, res) => {
   if (req.token) {
     return res.json({id: id, token: req.token});
   }
-  return res.json(id);
+  return res.json({id: id});
 };
 
 exports.updateItemByIdApi = async (req, res) => {
