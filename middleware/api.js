@@ -16,8 +16,12 @@ exports.getItemsApi = async (req, res) => {
   const order = req.query.order || 'asc';
   const items = await db.getItems(box, column, order);
 
-  if (!items) return res.sendStatus(500);
-  if (!items.length) return res.sendStatus(204);
+  if (!items) return {
+    res.sendStatus(500);
+  }
+  if (!items.length) {
+    return res.sendStatus(204);
+  }
   if (req.token) {
     return res.json({records: items, token: req.token});
   }
