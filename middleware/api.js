@@ -64,8 +64,11 @@ exports.getItemByIdApi = async (req, res) => {
 exports.fetchItemByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
+  const admin = req.user.admin;
+  const user = req.user.username;
   const item = await db.getItemById(box, id);
-  const permitted = req.user.administrator || (req.user.username === item.user);
+  const permitted = admin || (user === item.user);
+
   if (!permitted) {
     return res.sendStatus(403);
   }
@@ -174,9 +177,11 @@ exports.updateItemByIdApi = async (req, res) => {
   const reply = req.body.replyTo.trim();
   const note = req.body.note.trim();
   const file = req.body.fileProps;
+  const admin = req.user.admin;
+  const user = req.user.username;
   let update = {};
 
-  const permitted = req.user.administrator || (req.user.username === owner);
+  const permitted = admin || (user === owner);
   if (!permitted) {
     return res.sendStatus(403);
   }
@@ -199,7 +204,9 @@ exports.updateItemByIdApi = async (req, res) => {
       file.type
     );
   }
-  if (update.newFile || update.token) return res.json({...update});
+  if (update.newFile || update.token) {
+    return res.json({...update});
+  }
   return res.sendStatus(200);
 };
 
@@ -224,7 +231,9 @@ exports.updateStatusApi = async (req, res) => {
   const id = req.params.id
   const status = req.body.newStatus;
   const owner = req.body.owner;
-  const permitted = req.user.administrator || (req.user.username === owner);
+  const admin = req.user.admin
+  const user = req.user.username
+  const permitted = admin || (user === owner);
 
   if (!permitted) {
     return res.sendStatus(403);
