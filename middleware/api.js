@@ -103,8 +103,10 @@ exports.downloadFileApi = async (req, res) => {
 exports.deleteAttachmentByNameApi = async (req, res) => {
   const id = req.params.id;
   const { user, file } = await db.getAttachmentByName(id);
+  const reqUser = req.user.username;
+  const admin = req.user.admin;
 
-  const permitted = req.user.administrator || (req.user.username === user);
+  const permitted = admin || (reqUser === user);
   if (!permitted) {
     return res.sendStatus(403);
   }
