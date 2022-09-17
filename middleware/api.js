@@ -396,7 +396,9 @@ exports.resetPasswordApi = async (req, res) => {
   }
 
   const pass = await db.updateUserPassword(username, hash);
-  if (!pass) return res.sendStatus(500);
+  if (!pass) {
+    return res.sendStatus(500);
+  }
 
   const emailSent = smtp.sendCreds(email, username, newPass);
   if (!emailSent) {
