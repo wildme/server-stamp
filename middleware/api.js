@@ -64,20 +64,22 @@ exports.getItemByIdApi = async (req, res) => {
 exports.fetchItemByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
+  const item = await db.getItemById(box, id);
+  if (!item) {
+      return res.sendStatus(204);
+  }
+
   const admin = req.user.admin;
   const user = req.user.username;
-  const item = await db.getItemById(box, id);
   const permitted = admin || (user === item.user);
-
   if (!permitted) {
     return res.sendStatus(403);
   }
+
   if (item === 'error') {
     return res.sendStatus(500);
   }
-  if (!item) {
-    return res.sendStatus(204);
-  }
+
   if (req.token) {
     return res.json({record: item, token: req.token});
   }
