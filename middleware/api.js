@@ -14,7 +14,9 @@ exports.getItemsApi = async (req, res) => {
   const box = req.params.box;
   const column = req.query.column || 'id';
   const order = req.query.order || 'asc';
-  const items = await db.getItems(box, column, order);
+  const year = Number(req.query.year);
+  const items = await db.getItems(box, column, order, year);
+  const years = await db.getYearsOfActivity(box);
 
   if (!items) { 
     return res.sendStatus(500);
@@ -23,9 +25,9 @@ exports.getItemsApi = async (req, res) => {
     return res.sendStatus(204);
   }
   if (req.token) {
-    return res.json({records: items, token: req.token});
+    return res.json({records: items, years: years, token: req.token});
   }
-  return res.json({records: items});
+  return res.json({records: items, years: years});
 };
 
 exports.getContactsApi = async (req, res) => {
@@ -144,7 +146,7 @@ exports.deleteContactByIdApi = async (req, res) => {
 
 exports.addItemApi = async (req, res) => {
   const box = req.params.box;
-  const year = new Date().getFullYear();
+  const year = String(new Date().getFullYear());
   const user = req.body.user;
   const subj = req.body.subject.trim();
   const addr = req.body.fromTo.trim();
