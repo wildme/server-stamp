@@ -25,9 +25,18 @@ const Contact = require('./models/contact.js');
 const Settings = require('./models/settings.js');
 
 module.exports = {
-  getItems: async (box, column, order) => {
-    return await Box.find({box: box}).sort([[column, order]])
+  getItems: async (box, column, order, year) => {
+    const newYear = new Date(year, 0, 1, 0, 0, 0);
+    const endYear = new Date(year, 11, 31, 23, 59, 59);
+    return await Box.find({box: box,
+      date: {$gte: newYear, $lte: endYear}}).sort([[column, order]])
       .then(items => items)
+      .catch((err) => {console.error(err); return null;});
+  },
+
+  getYearsOfActivity: async (box) => {
+    return await LastId.find({box: box}, 'year')
+      .then(years => years.map(year => year.year))
       .catch((err) => {console.error(err); return null;});
   },
 
