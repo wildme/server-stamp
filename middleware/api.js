@@ -152,7 +152,7 @@ exports.addItemApi = async (req, res) => {
   const addr = req.body.fromTo.trim();
   const reply = req.body.replyTo.trim();
   const note = req.body.note.trim();
-  const file = req.body.fileProps;
+  const file = req.body.fileData;
 
   const id = await db.addItem(box, year, subj, addr, user, reply, note);
 
@@ -182,7 +182,7 @@ exports.updateItemByIdApi = async (req, res) => {
   const addr = req.body.fromTo.trim();
   const reply = req.body.replyTo.trim();
   const note = req.body.note.trim();
-  const file = req.body.fileProps;
+  const file = req.body.fileData;
   const admin = req.user.admin;
   const user = req.user.username;
   let update = {};
