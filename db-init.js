@@ -24,7 +24,7 @@ const admin = new User({
 const curYear = String(new Date().getFullYear());
 
 const inboxLastId = new LastId({box: 'inbox', year: curYear});
-const outboxLastId = new LastId({box: 'outbox' year: curYear});
+const outboxLastId = new LastId({box: 'outbox', year: curYear});
 const language = new Settings({language: process.env.STAMP_LANG || 'en-En'});
 
 (async function() {
