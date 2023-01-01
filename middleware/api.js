@@ -21,11 +21,14 @@ exports.getItemsApi = async (req, res) => {
   if (!items) { 
     return res.sendStatus(500);
   }
-  if (!items.length) {
+  if (!items.length && !years.length) {
     return res.sendStatus(204);
   }
   if (req.token) {
     return res.json({records: items, years: years, token: req.token});
+  }
+  if (!items.length && years.length) {
+    return res.json({records: false, years: years});
   }
   return res.json({records: items, years: years});
 };
