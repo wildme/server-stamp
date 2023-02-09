@@ -8,7 +8,7 @@ const api = require('./middleware/api.js');
 const login = require('./middleware/login.js');
 const token = require('./middleware/token.js');
 const getFile = require('./middleware/file-upload.js');
-const { WebSocket, WebSocketServer } = require('ws');
+const { WebSocketServer, WebSocket } = require('ws');
 
 const app = express();
 const port = Number(process.env.STAMP_EXPRESS_PORT) || 3000;
@@ -28,6 +28,7 @@ for (let i = 0; i < appDirs.length; i++) {
 }
 
 wss.on('connection', function connection(ws) {
+  ws.send('TEST');
   ws.on('message', function message(data) {
     wss.clients.forEach(function each(client) {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
