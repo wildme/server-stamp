@@ -8,12 +8,14 @@ const api = require('./middleware/api.js');
 const login = require('./middleware/login.js');
 const token = require('./middleware/token.js');
 const getFile = require('./middleware/file-upload.js');
+const { WebSocket, WebSocketServer } = require('ws');
 
 const app = express();
 const port = Number(process.env.STAMP_EXPRESS_PORT) || 3000;
 const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
 const uploadDir = String(process.env.STAMP_EXPRESS_UPLOAD_DIR) || 'files';
 const appDirs = [staticDir, uploadDir];
+const wss = new WebSocketServer({ port: 8080 });
 
 for (let i = 0; i < appDirs.length; i++) {
   access(appDirs[i], constants.F_OK, (err) => {
@@ -24,6 +26,17 @@ for (let i = 0; i < appDirs.length; i++) {
     }
   });
 }
+
+wss.on('connection', function connection(ws) {
+  ws.on('message', function message(data) {
+    wss.clients.forEach(function each(client) {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(data);
+      }
+    });
+  });
+});
+
 //app.use('/api', cors());
 app.use(express.static(path.join(__dirname, staticDir)));
 app.use(bodyParser.urlencoded({extended: true}));
