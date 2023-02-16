@@ -16,6 +16,7 @@ const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
 const uploadDir = String(process.env.STAMP_EXPRESS_UPLOAD_DIR) || 'files';
 const appDirs = [staticDir, uploadDir];
 const wss = new WebSocketServer({ port: 8080 });
+let sockets = {inbox:[], outbox:[]};
 
 for (let i = 0; i < appDirs.length; i++) {
   access(appDirs[i], constants.F_OK, (err) => {
@@ -27,14 +28,19 @@ for (let i = 0; i < appDirs.length; i++) {
   });
 }
 
-wss.on('connection', function connection(ws) {
-  ws.send('TEST');
+wss.on('connection', function connection(ws, req) {
+  const box = req.url.slice(1);
+  if (box === 'inbox') sockets.inbox.push(ws);
+  if (box === 'outbox') sockets.outbox.push(ws);
   ws.on('message', function message(data) {
-    wss.clients.forEach(function each(client) {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(data);
+    sockets[box].forEach(function(socket) {
+      if (socket !== ws && socket.readyState === WebSocket.OPEN) {
+        socket.send(data.toString());
       }
     });
+  });
+  ws.on('close', function() {
+    sockets[box] = sockets[box].filter(s => s !== ws);
   });
 });
 
@@ -53,6 +59,7 @@ app.get('/api/contacts/search/by-name', token.authenticate, api.searchContactsAp
 app.get('/api/download/:file', token.authenticate, api.downloadFileApi);
 app.get('/api/get/language', api.getAppLanguageApi);
 app.get('/api/:box', token.authenticate, api.getItemsApi);
+app.get('/api/:box/nextid', token.authenticate, api.getNextRecordIdApi);
 app.get('/api/edit/:box/:id', token.authenticate, api.fetchItemByIdApi);
 app.get('/api/view/:box/:id', token.authenticate, api.getItemByIdApi);
 app.get('/*', api.getReactIndex);
