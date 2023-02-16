@@ -3,6 +3,7 @@ const db = require('../db.js');
 const smtp = require('../libs/smtp.js');
 const hashpass = require('../libs/hashpass.js');
 const path = require('path');
+const { WebSocket } = require('ws');
 
 const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
 
@@ -31,6 +32,17 @@ exports.getItemsApi = async (req, res) => {
     return res.json({records: false, years: years});
   }
   return res.json({records: items, years: years});
+};
+
+exports.getNextRecordIdApi = async (req, res) => {
+  const box = req.params.box;
+  const curYear = new Date().getFullYear();
+  const nextId = await db.getNextRecordId(box, curYear);
+  const nextIdStr = nextId + '-' + curYear;
+  if (req.token) {
+    return res.json({nextid: nextIdStr, token: req.token});
+  }
+  return res.json({nextid: nextIdStr});
 };
 
 exports.getContactsApi = async (req, res) => {
@@ -171,6 +183,11 @@ exports.addItemApi = async (req, res) => {
       file.type
     );
   }
+  const ws = new WebSocket(`ws://localhost:8080/${box}`);
+  ws.on('open', function() {
+    const nextId = Number(id.split('-')[0]) + 1;
+    ws.send(nextId + '-' + year);
+  });
   if (req.token) {
     return res.json({id: id, token: req.token});
   }
