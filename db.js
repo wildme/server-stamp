@@ -40,6 +40,12 @@ module.exports = {
       .catch((err) => {console.error(err); return null;});
   },
 
+  getNextRecordId: async (box, year) => {
+    return await LastId.findOne({box: box, year: year}, 'lastId')
+      .then(lastId => lastId.lastId + 1)
+      .catch((err) => {console.error(err); return null;});
+  },
+
   getItemById: async (box, id) => {
     return await Box.findOne({box: box, id: id},
       'id status addr subj date updated user reply note file.name file.fsName').lean()
