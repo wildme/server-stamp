@@ -40,9 +40,9 @@ module.exports = {
       .catch((err) => {console.error(err); return null;});
   },
 
-  getNextRecordId: async (box, year) => {
+  getLastRecordId: async (box, year) => {
     return await LastId.findOne({box: box, year: year}, 'lastId')
-      .then(lastId => lastId.lastId + 1)
+      .then(lastId => lastId.lastId)
       .catch((err) => {console.error(err); return null;});
   },
 
