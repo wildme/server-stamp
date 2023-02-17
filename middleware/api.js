@@ -37,7 +37,12 @@ exports.getItemsApi = async (req, res) => {
 exports.getNextRecordIdApi = async (req, res) => {
   const box = req.params.box;
   const curYear = new Date().getFullYear();
-  const nextId = await db.getNextRecordId(box, curYear);
+  const lastId = await db.getLastRecordId(box, curYear);
+  let nextId;
+
+  if (lastId) nextId = lastId + 1;
+  else nextId = 1;
+
   const nextIdStr = nextId + '-' + curYear;
   if (req.token) {
     return res.json({nextid: nextIdStr, token: req.token});
