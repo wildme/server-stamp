@@ -12,10 +12,11 @@ const { WebSocketServer, WebSocket } = require('ws');
 
 const app = express();
 const port = Number(process.env.STAMP_EXPRESS_PORT) || 3000;
+const wssPort = Number(process.env.STAMP_WEBSOCKET_PORT) || 8080;
 const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
 const uploadDir = String(process.env.STAMP_EXPRESS_UPLOAD_DIR) || 'files';
 const appDirs = [staticDir, uploadDir];
-const wss = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: wssPort });
 let sockets = {inbox:[], outbox:[]};
 
 for (let i = 0; i < appDirs.length; i++) {
