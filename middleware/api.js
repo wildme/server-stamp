@@ -6,6 +6,7 @@ const path = require('path');
 const { WebSocket } = require('ws');
 
 const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
+const wssPort = Number(process.env.STAMP_WEBSOCKET_PORT) || 8080;
 
 exports.getReactIndex = async (req, res) => {
   return res.sendFile(path.join(process.cwd(), staticDir, 'index.html'));
@@ -188,7 +189,7 @@ exports.addItemApi = async (req, res) => {
       file.type
     );
   }
-  const ws = new WebSocket(`ws://localhost:8080/${box}`);
+  const ws = new WebSocket(`ws://localhost:${wssPort}/${box}`);
   ws.on('open', function() {
     const nextId = Number(id.split('-')[0]) + 1;
     ws.send(nextId + '-' + year);
