@@ -13,7 +13,7 @@ exports.getNewToken = async function(refreshToken) {
     if (err.message === 'jwt expired') {
       return 'expired';
     }
-    console.error(err);
+    console.error(err.message);
     return 'error';
   }
   const user = await User.findById(decoded.sub);
@@ -35,7 +35,7 @@ exports.verifyToken = function(accessToken) {
     if (err.message === 'jwt expired') {
         return 'expired';
       }
-      console.error(err);
+      console.error(err.message);
       return 'error';
     }
   return decoded;
@@ -49,7 +49,7 @@ exports.getUserProfileAndToken = async function(refreshToken) {
     if (err.message === 'jwt expired') {
       return 'expired';
     }
-    console.error(err);
+    console.error(err.message);
     return 'error';
   }
   const user = await User.findById(decoded.sub);
