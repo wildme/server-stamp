@@ -3,12 +3,13 @@ const db = mongoose.connection;
 const connectionString = process.env.STAMP_MONGODB;
 const opts = {connectTimeoutMS: 5000};
 
-mongoose.connect(connectionString, opts );
+mongoose.connect(connectionString, opts )
+  .catch((err) => {console.log("Couldn't connect: ", err)});
 
 process.on('SIGINT', () => {
-  db.close((err) => {
-    process.exit(err ? 1 : 0);
-  });
+  db.close()
+    .then(() => process.exit(0))
+    .catch((err) => process.exit(1))
 });
 
 db.on('error', (err) => {
