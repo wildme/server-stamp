@@ -187,6 +187,12 @@ module.exports = {
       .catch((err) => {console.error(err);});
   },
 
+  searchRecordsById: async (box, id) => {
+    return await Box.find({box: box, id: new RegExp("^" + id, "i")}, 'id')
+      .then(records => records)
+      .catch((err) => {console.error(err);});
+  },
+
   checkUsername: async (username) => {
     return await User.findOne({username: username}, 'username')
       .then(user => user)
