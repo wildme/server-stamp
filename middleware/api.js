@@ -398,6 +398,21 @@ exports.addContactApi = async (req, res) => {
   return res.sendStatus(200);
 };
 
+exports.searchRecordsByIdApi = async (req, res) => {
+  const box = req.params.box;
+  const id = req.body.value.trim();
+  const escSpecChars = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const result = await db.searchRecordsById(box, escSpecChars);
+
+  if (!result) {
+    return res.sendStatus(500);
+  }
+  if (req.token) {
+    return res.json({result: result, token: req.token});
+  }
+  return res.json({result: result});
+};
+
 exports.getAppLanguageApi = async (req, res) => {
   const setting = await db.getAppLanguage();
 
