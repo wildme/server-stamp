@@ -179,14 +179,6 @@ module.exports = {
     return doc ? file : null;
   },
 
-  searchContactsByName: async (name) => {
-    const escSpecChars = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regexp  = new RegExp(escSpecChars, "i");
-    return await Contact.find({name: regexp}, 'name location')
-      .then(contacts => contacts)
-      .catch((err) => {console.error(err);});
-  },
-
   searchRecordsById: async (box, id) => {
     return await Box.find({box: box, id: new RegExp("^" + id, "i")}, 'id')
       .then(records => records)

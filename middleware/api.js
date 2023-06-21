@@ -371,18 +371,6 @@ exports.signupApi = async (req, res) => {
   return res.sendStatus(201);
 };
 
-exports.searchContactsApi = async (req, res) => {
-  const name = req.query.name;
-  const contacts = await db.searchContactsByName(name);
-  if (!contacts) {
-    return res.sendStatus(500);
-  }
-  if (req.token) {
-    return res.json({contacts: contacts, token: req.token});
-  }
-  return res.json({contacts: contacts});
-};
-
 exports.addContactApi = async (req, res) => {
   const orgName = req.body.orgName.trim();
   const orgLocation = req.body.orgLocation.trim();
