@@ -180,8 +180,8 @@ module.exports = {
   },
 
   searchRecordsById: async (box, id) => {
-    return await Box.find({box: box, id: new RegExp("^" + id, "i")}, 'id')
-      .then(records => records)
+    return await Box.find({box: box, id: new RegExp("^" + id, "i")}, 'id -_id')
+      .then(records => records.map(record => record.id))
       .catch((err) => {console.error(err);});
   },
 
