@@ -129,8 +129,12 @@ module.exports = {
   },
 
   updateUserSettings: async (user, settings) => {
-    return await User.updateOne({username: user}, {settings: settings},
-      {upsert: true})
+    const bulk = User.collection.initializeUnorderedBulkOp();
+    if (settings.sortOrder) {
+      bulk.find({username: user})
+        .updateOne({$set:{"settings.sortOrder": settings.sortOrder}});
+    }
+    return await bulk.execute()
       .then(data => data)
       .catch(err => {console.error(err); return null;});
   },
