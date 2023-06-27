@@ -340,7 +340,7 @@ exports.updateUserPasswordApi = async (req, res) => {
 
 exports.updateUserSettingsApi = async (req, res) => {
   const username = req.body.user;
-  const newSettings = {...req.body.settings};
+  const newSettings = req.body.settings;
   const settings = await db.updateUserSettings(username, newSettings);
 
   if (!settings) {
@@ -433,7 +433,7 @@ exports.resetPasswordApi = async (req, res) => {
     return res.sendStatus(500);
   }
 
-  const emailSent = smtp.sendCreds(email, username, newPass);
+  const emailSent = await smtp.sendCreds(email, username, newPass);
   if (!emailSent) {
     return res.status(500).json({error: 'Cannot send email'});
   }
