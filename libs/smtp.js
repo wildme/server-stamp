@@ -10,6 +10,7 @@ const transporter = nodemailer.createTransport({
       pass: String(process.env.STAMP_EXPRESS_SMTP_PASS)
     },
     tls: {
+      ciphers: 'DEFAULT@SECLEVEL=0',
       rejectUnauthorized: Boolean(
         Number(process.env.STAMP_EXPRESS_SMTP_REJECT_UNAUTH)
       )
@@ -24,13 +25,7 @@ exports.sendCreds = async (email, username, password) => {
     text: `login: ${username}\npassword: ${password}`
   };
 
-  return transporter.sendMail(message, (err, info) => {
-    if (err) { 
-      console.error(err);
-      return null;
-    }
-    else {
-      return info.accepted;
-    }
-  })
+  return await transporter.sendMail(message)
+    .then(info => info.messageId)
+    .catch(err => {console.error(err); return null;})
 };
