@@ -29,6 +29,14 @@ for (let i = 0; i < appDirs.length; i++) {
   });
 }
 
+const server = app.listen(port, () => {
+  console.log(`Express is running on port ${port}`)
+});
+
+process.on('SIGINT', () => {
+  server.close(() => { console.log("Express closed"); })
+});
+
 wss.on('connection', function connection(ws, req) {
   const box = req.url.slice(1);
   if (box === 'inbox') sockets.inbox.push(ws);
@@ -79,7 +87,3 @@ app.put('/api/:box/status/:id', token.authenticate, api.updateStatusApi);
 app.put('/api/:box/update/:id', token.authenticate, api.updateItemByIdApi);
 app.delete('/api/attachment/delete/:id', token.authenticate, api.deleteAttachmentByNameApi);
 app.delete('/api/contact/delete/:id', token.authenticate, api.deleteContactByIdApi);
-
-app.listen(port, () => {
-  console.log(`Express is running on port ${port}`)
-});
