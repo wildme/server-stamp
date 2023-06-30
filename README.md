@@ -16,6 +16,7 @@ export STAMP_JWT_COOKIE_AGE=28800000 ***# in milliseconds. 8 hours***
 export STAMP_JWT_ACCESS_EXP=600  ***# in seconds. 10 min***  
 export STAMP_JWT_REFRESH_EXP=28800 ***# in seconds. 8 hours***  
 export NODE_OPTIONS=--tls-min-v1.0 ***# (optional)***  
+export NODE_ENV=production   
 export STAMP_EXPRESS_SMTP_HOST=<IP_HOST>  
 export STAMP_EXPRESS_SMTP_PORT=587  
 export STAMP_EXPRESS_SMTP_SECURE=0  
