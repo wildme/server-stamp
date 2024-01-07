@@ -43,7 +43,7 @@ module.exports = {
 
   getLastRecordId: async (box, year) => {
     return await LastId.findOne({box: box, year: year}, 'lastId')
-      .then(lastId => lastId.lastId)
+      .then(lastId => (lastId == null) ? 0 : lastId.lastId)
       .catch((err) => {console.error(err); return null;});
   },
 
