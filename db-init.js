@@ -1,61 +1,61 @@
+#!/usr/bin/env node
+
 const mongoose = require('mongoose');
-
+const lastId = require('./models/lastId.js');
+const user = require('./models/user.js');
+const settings = require('./models/settings.js');
 const connectionString = process.env.STAMP_MONGODB || 'mongodb://localhost:27017/stamp';
-
-mongoose.connect(connectionString);
-const db = mongoose.connection;
-
-db.on('error', (err) => { console.error(err.message); process.exit(1); })
-  .on('close', () => console.log('Connection closed'));
-db.once('open', () => console.log('Connection established'));
-
-const LastId = require('./models/lastId.js');
-const User = require('./models/user.js');
-const Settings = require('./models/settings.js');
-
-const admin = new User({
-  username: 'admin',
-  password: 'admin',
-  firstname: 'Admin',
-  lastname: 'Admin',
-  email: 'admin@example.com',
-  administrator: true
-});
+const opts = {connectTimeoutMS: 5000};
 const curYear = String(new Date().getFullYear());
 
-const inboxLastId = new LastId({box: 'inbox', year: curYear});
-const outboxLastId = new LastId({box: 'outbox', year: curYear});
-const language = new Settings({language: process.env.STAMP_LANG || 'en-En'});
+mongoose.connect(connectionString, opts)
+  .catch((err) => {console.error("Couldn't init connection to MongoDB: ", err)});
+const db = mongoose.connection;
+
+db.once('open', () => console.log('Connection established'));
+db.on('error', (err) => {console.error(err.message); process.exit(1);})
+  .on('close', () => console.log('Connection closed'))
+  .on('disconnected', () => console.log('Disconnected from MongoDB'));
 
 (async function() {
-  const adminUser = await User.exists({username: 'admin'});
-  const inLastId = await LastId.exists({box: 'inbox'});
-  const outLastId = await LastId.exists({box: 'outbox'});
-  const appLanguage = await Settings.findOne({'language': { $exists: true }});
+  const adminUser = await user.exists({username: 'admin'});
+  const inLastId = await lastId.exists({box: 'inbox'});
+  const outLastId = await lastId.exists({box: 'outbox'});
+  const appLang = await settings.findOne({'language': { $exists: true }});
 
   if (adminUser) { 
-    console.log('Admin user exists');
+    console.log('Admin account exists. Skipping');
   } else {
-    await admin.save();
-    console.log('Admin user has been created!');
+    const admin = new User({username: 'admin', password: 'admin',
+      firstname: 'Admin', lastname: 'Admin', email: 'admin@example.com',
+      administrator: true});
+    await admin.save()
+      .then(() => {console.log('Admin account has been created!');})
+      .catch((err) => {console.error(err)});
   }
   if (inLastId) {
-    console.log('Inbox lastID collection exists');
+    console.log('Inbox lastID collection exists. Skipping');
   } else {
-    await inboxLastId.save();
-    console.log('Inbox lastId has been created');
+    const inboxLastId = new lastId({box: 'inbox', year: curYear});
+    await inboxLastId.save()
+      .then(() => {console.log('Inbox lastId has been created');})
+      .catch((err) => {console.error(err)});
   }
   if (outLastId) {
-    console.log('Outbox lastID collection exists');
+    console.log('Outbox lastID collection exists. Skipping');
   } else {
-    await outboxLastId.save();
-    console.log('Outbox lastId has been created');
+    const outboxLastId = new lastId({box: 'outbox', year: curYear});
+    await outboxLastId.save()
+      .then(() => {console.log('Outbox lastId has been created');})
+      .catch((err) => {console.error(err)});
   }
-  if (appLanguage) {
-    console.log('Language is already set');
+  if (appLang) {
+    console.log('Language is already set. Skipping');
   } else {
-    await language.save();
-    console.log('Language document has been created in Settings');
+    const lang = new settings({language: process.env.STAMP_LANG || 'en-En'});
+    await lang.save()
+      .then(() => {console.log('Language has been set');})
+      .catch((err) => {console.error(err)});
   }
   return db.close();
 })();
