@@ -1,29 +1,27 @@
 const mongoose = require('mongoose');
-const db = mongoose.connection;
-const connectionString = process.env.STAMP_MONGODB;
-const opts = {connectTimeoutMS: 5000};
-
-mongoose.connect(connectionString, opts )
-  .catch((err) => {console.log("Couldn't connect: ", err)});
-
-process.on('SIGINT', () => {
-  db.close()
-    .then(() => process.exit(0))
-    .catch((err) => process.exit(1))
-});
-
-db.on('error', (err) => {
-  console.error(err.message);
-  process.exit(1);
-});
-
-db.once('open', () => console.log('Connection established'));
-
 const Box = require('./models/box.js');
 const LastId = require('./models/lastId.js');
 const User = require('./models/user.js');
 const Contact = require('./models/contact.js');
 const Settings = require('./models/settings.js');
+
+const connectionString = process.env.STAMP_MONGODB;
+const opts = {connectTimeoutMS: 5000};
+
+mongoose.connect(connectionString, opts)
+  .catch((err) => {console.error("Couldn't init connection to MongoDB: ", err)});
+
+const db = mongoose.connection;
+process.on('SIGINT', () => {
+  db.close()
+    .then(() => process.exit(0))
+    .catch((err) => {console.error(err); process.exit(1);})
+});
+
+db.once('open', () => console.log('Connection established'));
+db.on('error', (err) => {console.error(err.message); process.exit(1);})
+  .on('close', () => console.log('Connection closed'))
+  .on('disconnected', () => console.log('Disconnected from MongoDB'));
 
 module.exports = {
   getItems: async (box, column, order, year) => {
