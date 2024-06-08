@@ -1,4 +1,5 @@
 const express = require('express');
+const session = require('express-session');
 const cookieparser = require('cookie-parser');
 //const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -15,6 +16,9 @@ const port = Number(process.env.STAMP_EXPRESS_PORT) || 3000;
 const wssPort = Number(process.env.STAMP_WEBSOCKET_PORT) || 8080;
 const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
 const uploadDir = String(process.env.STAMP_EXPRESS_UPLOAD_DIR) || 'files';
+const sessionSecret = String(process.env.STAMP_SESSION_SECRET) || 'zZq30P4LZNA0uV0';
+const sessionOpts = {secret: sessionSecret, resave: false,
+  saveUninitialized: true};
 const appDirs = [staticDir, uploadDir];
 const wss = new WebSocketServer({ port: wssPort });
 let sockets = {inbox:[], outbox:[]};
@@ -34,7 +38,7 @@ const server = app.listen(port, () => {
 });
 
 process.on('SIGINT', () => {
-  server.close(() => { console.log("Express closed"); })
+  server.close(() => {console.log("Express closed");})
 });
 
 wss.on('connection', function connection(ws, req) {
@@ -58,6 +62,7 @@ app.use(express.static(path.join(__dirname, staticDir)));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(cookieparser());
+app.use(session(sessionOpts));
 
 login.init(app);
 
