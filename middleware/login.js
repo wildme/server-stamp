@@ -39,8 +39,10 @@ exports.init = (app) => {
 };
 
 exports.logoutApi = (req, res) => {
-  req.logOut();
-  return res.clearCookie('jwt').sendStatus(200);
+  req.logOut(function(err) {
+    if (err) return next(err);
+    return res.clearCookie('jwt').sendStatus(200);
+  });
 };
 
 exports.loginApi = (req, res, next) => {
