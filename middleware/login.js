@@ -80,16 +80,17 @@ exports.loginApi = (req, res, next) => {
       const accessToken = jwt.sign(accessToken_payload, jwtAccessSecret);
       const refreshToken = undefined;
       const settings = user.settings;
+      const roles = user.roles;
 
       if (!req.cookies['jwt']) {
         let refreshToken = jwt.sign(refreshToken_payload, jwtRefreshSecret);
 
         return res.status(200)
           .cookie('jwt', refreshToken, {httpOnly: true, maxAge: jwtCookieAge})
-          .json({ user: profile, token: accessToken, settings: settings });
+          .json({ user: profile, token: accessToken, settings: settings, roles: roles });
       }
 
-      return res.json({user: profile, token: accessToken, settings: settings});
+      return res.json({user: profile, token: accessToken, settings: settings, roles: roles});
       })
     })(req, res, next);
 };
