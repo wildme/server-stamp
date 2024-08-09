@@ -4,6 +4,9 @@ const LastId = require('./models/lastId.js');
 const User = require('./models/user.js');
 const Contact = require('./models/contact.js');
 const Settings = require('./models/settings.js');
+const Directive = require('./models/directive.js');
+const DocCode = require('./models/docCode.js');
+const DocLastId = require('./models/docLastId.js');
 
 const connectionString = process.env.STAMP_MONGODB;
 const opts = {connectTimeoutMS: 5000};
@@ -33,14 +36,36 @@ module.exports = {
       .catch((err) => {console.error(err); return null;});
   },
 
-  getYearsOfActivity: async (box) => {
-    return await LastId.find({box: box}, 'year')
-      .then(years => years.map(year => year.year))
+  getDirectives: async (column, order, year) => {
+    const newYear = new Date(year, 0, 1, 0, 0, 0);
+    const endYear = new Date(year, 11, 31, 23, 59, 59);
+    return await Directive.find({createdAt: {$gte: newYear, $lte: endYear}})
+      .sort([[column, order]])
+      .then(items => items)
       .catch((err) => {console.error(err); return null;});
+  },
+
+  getYearsOfActivity: async (doc) => {
+    if (doc === 'inbox' || doc === 'outbox') {
+      return await LastId.find({box: doc}, 'year')
+        .then(years => years.map(year => year.year))
+        .catch((err) => {console.error(err); return null;});
+    }
+    if (doc === 'directives') {
+      return await Directive.find({}, 'createdAt')
+        .then(years => years)
+        .catch((err) => {console.error(err); return null;});
+    }
   },
 
   getLastRecordId: async (box, year) => {
     return await LastId.findOne({box: box, year: year}, 'lastId')
+      .then(lastId => (lastId == null) ? 0 : lastId.lastId)
+      .catch((err) => {console.error(err); return null;});
+  },
+
+  getLastDocId: async (doc) => {
+    return await DocLastId.findOne({doc: doc}, 'lastId')
       .then(lastId => (lastId == null) ? 0 : lastId.lastId)
       .catch((err) => {console.error(err); return null;});
   },
@@ -52,15 +77,47 @@ module.exports = {
       .catch((err) => {console.error(err); return 'error';});
   },
 
-  getAttachmentByName: async (id) => {
-    return await Box.findOne({'file.fsName': id}, 'user file')
-      .then(data => data)
-      .catch((err) => {console.error(err); return 'error'});
+  getDirectiveById: async (id) => {
+    return await Directive.findOne({id: id},
+      'id status subj createdAt updatedAt user note typeCode file.name file.fsName').lean()
+      .then(item => item)
+      .catch((err) => {console.error(err); return 'error';});
+  },
+
+  getAttachmentByName: async (doc, id) => {
+    if (doc === 'inbox' || doc === 'outbox') {
+      return await Box.findOne({'file.fsName': id}, 'user file')
+        .then(data => data)
+        .catch((err) => {console.error(err); return 'error'});
+    }
+    if (doc === 'directive') {
+      return await Directive.findOne({'file.fsName': id}, 'user file')
+        .then(data => data)
+        .catch((err) => {console.error(err); return 'error'});
+    }
+  },
+
+  getAppLanguage: async () => {
+    return await Settings.findOne({}, 'language')
+      .then(lang => lang)
+      .catch((err) => {console.error(err);});
+  },
+
+  getDocCodes: async (doc) => {
+    return await DocCode.find({doc: doc}, 'code title')
+      .then(docCodes => docCodes)
+      .catch((err) => {console.error(err); return null;});
   },
 
   getUserFullname: async (user) => {
     return await User.findOne({username: user}, 'firstname lastname')
       .then(user => user)
+      .catch((err) => {console.error(err);});
+  },
+
+  getUserRoles: async (user) => {
+    return await User.findOne({username: user}, 'roles')
+      .then(user => user.roles)
       .catch((err) => {console.error(err);});
   },
 
@@ -70,10 +127,17 @@ module.exports = {
       .catch((err) => {console.error(err); return null;});
   },
 
-  deleteAttachmentByName: async (id) => {
-    return await Box.updateOne({'file.fsName': id}, { $unset: { file: true }})
-      .then(data => data)
-      .catch((err) => {console.error(err); return null;});
+  deleteAttachmentByName: async (doc, id) => {
+    if (doc === 'inbox' || doc === 'outbox') {
+      return await Box.updateOne({'file.fsName': id}, { $unset: { file: true }})
+        .then(data => data)
+        .catch((err) => {console.error(err); return null;});
+    }
+    if (doc === 'directive') {
+      return await Directive.updateOne({'file.fsName': id}, { $unset: { file: true }})
+        .then(data => data)
+        .catch((err) => {console.error(err); return null;});
+    }
   },
 
   deleteContactById: async (id) => {
@@ -94,10 +158,23 @@ module.exports = {
       .catch(err => {console.error(err); return null;});
   },
 
-  updateStatus: async (box, id, status) => {
-    return await Box.updateOne({id: id, box: box}, {status: status})
-      .then(status => status)
+  updateDirectiveById: async (id, subj, note) => {
+    return await Box.updateOne({id: id}, { subj: subj, note: note })
+      .then(item => item)
       .catch(err => {console.error(err); return null;});
+  },
+
+  updateStatus: async (doc, id, status) => {
+    if (doc === 'inbox' || doc === 'outbox') {
+      return await Box.updateOne({id: id, box: doc}, {status: status})
+        .then(status => status)
+        .catch(err => {console.error(err); return null;});
+    }
+    if (doc === 'directive') {
+      return await Directive.updateOne({id: id}, {status: status})
+        .then(status => status)
+        .catch(err => {console.error(err); return null;});
+    }
   },
 
   updateContactById: async (id, name, region, location) => {
@@ -159,6 +236,24 @@ module.exports = {
       .catch(err => {console.error(err); return null;});
   },
 
+  addDirective: async (subj, user, typeCode, note) => {
+    const query = {doc: 'directive'};
+    const update = {$inc: {lastId: 1}};
+    const opts = {upsert: true, new: true};
+    const { lastId } = await DocLastId.findOneAndUpdate(query, update, opts);
+    const doc = new Directive({
+      id: lastId,
+      subj: subj,
+      user: user,
+      typeCode: typeCode,
+      note: note,
+    });
+
+    return await doc.save()
+      .then(record => record.id)
+      .catch(err => {console.error(err); return null;});
+  },
+
   addContact: async (location, region, name) => {
     const doc = new Contact({location: location, region: region, name: name});
     return await doc.save()
@@ -176,6 +271,21 @@ module.exports = {
       date: new Date
     };
     const doc = await Box.updateOne({box: box, id: id}, {file: file})
+      .then(data => data)
+      .catch(err => {console.error(err); return null;});
+    return doc ? file : null;
+  },
+
+  addDirectiveAttachment: async (name, dir, fsName, id, size, mime) => {
+    const file = {
+      name: name,
+      dir: dir,
+      fsName: fsName,
+      size: size,
+      mime: mime,
+      date: new Date
+    };
+    const doc = await Directive.updateOne({id: id}, {file: file})
       .then(data => data)
       .catch(err => {console.error(err); return null;});
     return doc ? file : null;
@@ -217,11 +327,5 @@ module.exports = {
     return await user.save()
       .then(user => user)
       .catch(err => {console.error(err); return null;});
-  },
-
-  getAppLanguage: async () => {
-    return await Settings.findOne({}, 'language')
-      .then(lang => lang)
-      .catch((err) => {console.error(err);});
   }
 };
