@@ -9,6 +9,7 @@ const userSchema = mongoose.Schema({
   lastname: { type: String },
   email: { type: String, unique: true, required: true },
   administrator: { type: Boolean, default: false },
+  roles: [{ type: String, enum: ['user', 'chief'], default: 'user' }],
   settings: {
     sortOrder: { type: String, enum: ['desc', 'asc'], default: 'desc' }
   },
