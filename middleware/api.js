@@ -13,7 +13,7 @@ exports.getReactIndex = async (req, res) => {
 };
 
 exports.getItemsApi = async (req, res) => {
-  const box = req.params.box;
+  const box = req.params.doc;
   const column = req.query.column || 'id';
   const order = req.query.order || 'asc';
   const year = Number(req.query.year);
@@ -35,6 +35,50 @@ exports.getItemsApi = async (req, res) => {
   return res.json({records: items, years: years});
 };
 
+exports.getDirectivesApi = async (req, res) => {
+  const doc = req.params.doc;
+  const column = req.query.column || 'id';
+  const order = req.query.order || 'asc';
+  const year = Number(req.query.year);
+  let yearsSet = new Set();
+  const items = await db.getDirectives(column, order, year);
+  const years = await db.getYearsOfActivity(doc);
+  if (years.length) {
+    years.map((year => yearsSet.add(year.createdAt.getFullYear())));
+  }
+
+  if (!items) {
+    return res.sendStatus(500);
+  }
+  if (!items.length && !yearsSet.size) {
+    return res.sendStatus(204);
+  }
+  if (req.token) {
+    return res.json({records: items, years: [...yearsSet], token: req.token});
+  }
+  if (!items.length && yearsSet.size) {
+    return res.json({records: false, years: [...yearsSet]});
+  }
+  return res.json({records: items, years: [...yearsSet]});
+};
+
+exports.getDirectiveByIdApi = async (req, res) => {
+  const id = req.params.id;
+  const item = await db.getDirectiveById(id);
+  if (item === 'error') {
+    return res.sendStatus(500);
+  }
+  if (!item) {
+    return res.sendStatus(204);
+  }
+  const {firstname, lastname} = await db.getUserFullname(item.user);
+  item.fullname = [firstname, lastname].join(' ');
+  if (req.token) {
+    return res.json({record: item, token: req.token});
+  }
+  return res.json({record: item});
+};
+
 exports.getNextRecordIdApi = async (req, res) => {
   const box = req.params.box;
   const curYear = new Date().getFullYear();
@@ -49,6 +93,20 @@ exports.getNextRecordIdApi = async (req, res) => {
     return res.json({nextid: nextIdStr, token: req.token});
   }
   return res.json({nextid: nextIdStr});
+};
+
+exports.getNextDocIdApi = async (req, res) => {
+  const doc = req.params.doc;
+  const lastId = await db.getLastDocId(doc);
+  let nextId = 0;
+
+  if (lastId) nextId = lastId + 1;
+  else nextId = 1;
+
+  if (req.token) {
+    return res.json({nextid: nextId, token: req.token});
+  }
+  return res.json({nextid: nextId});
 };
 
 exports.getContactsApi = async (req, res) => {
@@ -84,6 +142,29 @@ exports.getItemByIdApi = async (req, res) => {
   return res.json({record: item});
 };
 
+exports.getDocCodesApi = async (req, res) => {
+  const doc = req.params.doc;
+  const admin = req.user.admin;
+  const user = req.user.username;
+  const roles = await db.getUserRoles(user);
+  const permitted = admin || (roles.includes('chief'));
+
+  if (!permitted) {
+    return res.sendStatus(403);
+  }
+
+  const items = await db.getDocCodes(doc);
+
+  if (!items) {
+    return res.sendStatus(500);
+  }
+
+  if (req.token) {
+    return res.json({docCodes: items, token: req.token});
+  }
+  return res.json({docCodes: items});
+};
+
 exports.fetchItemByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
@@ -109,9 +190,34 @@ exports.fetchItemByIdApi = async (req, res) => {
   return res.json({record: item});
 };
 
+exports.fetchDirectiveByIdApi = async (req, res) => {
+  const id = req.params.id;
+  const item = await db.getDirectiveById(id);
+  if (!item) {
+      return res.sendStatus(204);
+  }
+
+  const admin = req.user.admin;
+  const user = req.user.username;
+  const permitted = admin || (user === item.user);
+  if (!permitted) {
+    return res.sendStatus(403);
+  }
+
+  if (item === 'error') {
+    return res.sendStatus(500);
+  }
+
+  if (req.token) {
+    return res.json({record: item, token: req.token});
+  }
+  return res.json({record: item});
+};
+
 exports.downloadFileApi = async (req, res) => {
+  const doc = req.params.doc;
   const id = req.params.file;
-  const { file } = await db.getAttachmentByName(id);
+  const { file } = await db.getAttachmentByName(doc, id);
   if (file === 'error') {
     return res.sendStatus(500);
   }
@@ -127,7 +233,8 @@ exports.downloadFileApi = async (req, res) => {
 
 exports.deleteAttachmentByNameApi = async (req, res) => {
   const id = req.params.id;
-  const { user, file } = await db.getAttachmentByName(id);
+  const doc = req.params.doc;
+  const { user, file } = await db.getAttachmentByName(doc, id);
   const reqUser = req.user.username;
   const admin = req.user.admin;
 
@@ -135,7 +242,7 @@ exports.deleteAttachmentByNameApi = async (req, res) => {
   if (!permitted) {
     return res.sendStatus(403);
   }
-  const deleted = await db.deleteAttachmentByName(id);
+  const deleted = await db.deleteAttachmentByName(doc, id);
   if (!deleted) {
     return res.sendStatus(500);
   }
@@ -200,6 +307,32 @@ exports.addItemApi = async (req, res) => {
   return res.json({id: id});
 };
 
+exports.addDirectiveApi = async (req, res) => {
+  const user = req.body.user;
+  const subj = req.body.subject.trim();
+  const typeCode = req.body.typeCode;
+  const note = req.body.note.trim();
+  const file = req.body.fileData;
+
+  const id = await db.addDirective(subj, user, typeCode, note);
+
+  if (!id) return res.sendStatus(500);
+  if (file) {
+    const attachment = await db.addDirectiveAttachment(
+      file.filename,
+      file.fsDirectory,
+      file.fsFilename,
+      id,
+      file.size,
+      file.type
+    );
+  }
+  if (req.token) {
+    return res.json({id: id, token: req.token});
+  }
+  return res.json({id: id});
+};
+
 exports.updateItemByIdApi = async (req, res) => {
   const box = req.params.box;
   const id = req.params.id;
@@ -242,6 +375,44 @@ exports.updateItemByIdApi = async (req, res) => {
   return res.sendStatus(200);
 };
 
+exports.updateDirectiveByIdApi = async (req, res) => {
+  const id = req.params.id;
+  const owner = req.body.owner;
+  const subj = req.body.subject.trim();
+  const note = req.body.note.trim();
+  const file = req.body.fileData;
+  const admin = req.user.admin;
+  const user = req.user.username;
+  let update = {};
+
+  const permitted = admin || (user === owner);
+  if (!permitted) {
+    return res.sendStatus(403);
+  }
+
+  const item = await db.updateDirectiveById(id, subj, note);
+  if (!item) {
+    return res.sendStatus(500);
+  }
+  if (req.token) {
+    update.token = req.token;
+  }
+  if (file) {
+    update.newFile = await db.addDirectiveAttachment(
+      file.filename,
+      file.fsDirectory,
+      file.fsFilename,
+      id,
+      file.size,
+      file.type
+    );
+  }
+  if (update.newFile || update.token) {
+    return res.json({...update});
+  }
+  return res.sendStatus(200);
+};
+
 exports.updateContactByIdApi = async (req, res) => {
   const id = req.params.id
   const name = req.body.name.trim();
@@ -259,7 +430,7 @@ exports.updateContactByIdApi = async (req, res) => {
 };
 
 exports.updateStatusApi = async (req, res) => {
-  const box = req.params.box;
+  const doc = req.params.doc;
   const id = req.params.id
   const status = req.body.newStatus;
   const owner = req.body.owner;
@@ -270,7 +441,7 @@ exports.updateStatusApi = async (req, res) => {
   if (!permitted) {
     return res.sendStatus(403);
   }
-  const itemStatus = await db.updateStatus(box, id, status);
+  const itemStatus = await db.updateStatus(doc, id, status);
   if (!itemStatus) {
     return res.sendStatus(500);
   }
