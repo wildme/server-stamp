@@ -67,6 +67,7 @@ exports.getUserProfileAndToken = async function(refreshToken) {
   };
   const accessToken = jwt.sign(payload, jwtAccessSecret);
   const settings = user.settings;
+  const roles = user.roles;
 
-  return {user: profile, token: accessToken, settings: settings};
+  return {user: profile, token: accessToken, settings: settings, roles: roles};
 }
