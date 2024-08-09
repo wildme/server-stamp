@@ -159,7 +159,7 @@ module.exports = {
   },
 
   updateDirectiveById: async (id, subj, note) => {
-    return await Box.updateOne({id: id}, { subj: subj, note: note })
+    return await Directive.updateOne({id: id}, { subj: subj, note: note })
       .then(item => item)
       .catch(err => {console.error(err); return null;});
   },
