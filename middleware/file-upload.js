@@ -24,7 +24,7 @@ exports.uploadFileApi = async (req, res) => {
       fsFilename: req.file.filename,
       size: req.file.size,
       type: req.file.mimetype,
-      box: req.params.box
+      box: req.params.doc
     };
 
     if (req.token) {
