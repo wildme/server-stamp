@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
 const cookieparser = require('cookie-parser');
 //const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -12,13 +13,21 @@ const getFile = require('./middleware/file-upload.js');
 const { WebSocketServer, WebSocket } = require('ws');
 
 const app = express();
+const dbUrl = process.env.STAMP_MONGODB;
 const port = Number(process.env.STAMP_EXPRESS_PORT) || 3000;
+const sessionAge = Number(process.env.STAMP_SESSION_AGE) || 604800000;
 const wssPort = Number(process.env.STAMP_WEBSOCKET_PORT) || 8080;
 const staticDir = String(process.env.STAMP_EXPRESS_STATIC_DIR) || 'build';
 const uploadDir = String(process.env.STAMP_EXPRESS_UPLOAD_DIR) || 'files';
 const sessionSecret = String(process.env.STAMP_SESSION_SECRET) || 'zZq30P4LZNA0uV0';
-const sessionOpts = {secret: sessionSecret, resave: false,
-  saveUninitialized: true};
+const store = new MongoDBStore({ uri: dbUrl, collection: 'stampSessions'});
+const sessionOpts = {
+  secret: sessionSecret,
+  cookie: { maxAge: sessionAge },
+  resave: true,
+  saveUninitialized: true,
+  store: store
+};
 const appDirs = [staticDir, uploadDir];
 const wss = new WebSocketServer({ port: wssPort });
 let sockets = {inbox:[], outbox:[], directive:[]};
@@ -41,6 +50,10 @@ process.on('SIGINT', () => {
   server.close(() => {console.log("Express closed");})
 });
 
+store.on('error', function(error) {
+  console.log(error);
+});
+
 wss.on('connection', function connection(ws, req) {
   const doc = req.url.slice(1);
   if (doc === 'inbox') sockets.inbox.push(ws);
@@ -57,6 +70,7 @@ wss.on('connection', function connection(ws, req) {
     sockets[doc] = sockets[doc].filter(s => s !== ws);
   });
 });
+
 
 //app.use('/api', cors());
 app.use(express.static(path.join(__dirname, staticDir)));
