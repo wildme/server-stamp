@@ -327,6 +327,11 @@ exports.addDirectiveApi = async (req, res) => {
       file.type
     );
   }
+  const ws = new WebSocket(`ws://localhost:${wssPort}/directive`);
+  ws.on('open', function() {
+    const nextId = Number(id) + 1;
+    ws.send(nextId);
+  });
   if (req.token) {
     return res.json({id: id, token: req.token});
   }
