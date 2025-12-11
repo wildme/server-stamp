@@ -21,16 +21,10 @@ const userSchema = mongoose.Schema({
   }
 });
 
-userSchema.pre('save', function(next) {
+userSchema.pre('save', async function() {
   const user = this;
-  bcrypt.genSalt(saltRounds, function(err, salt) {
-    if (err) return next(err);
-    bcrypt.hash(user.password, salt, function(err, hash) {
-      if (err) return next(err);
-      user.password = hash;
-      next();
-    });
-  });
+  const hash = await bcrypt.hash(user.password, saltRounds);
+  user.password = hash;
 });
 
 const User = mongoose.model('User', userSchema);
