@@ -95,7 +95,7 @@ app.get('/api/:box/nextid', token.authenticate, api.getNextRecordIdApi);
 app.get('/api/edit/:box/:id', token.authenticate, api.fetchItemByIdApi);
 app.get('/api/view/:box/:id', token.authenticate, api.getItemByIdApi);
 app.get('/api/:doc/download/:file', token.authenticate, api.downloadFileApi);
-app.get('/*', api.getReactIndex);
+app.get('/*path', api.getReactIndex);
 app.post('/api/login', login.loginApi);
 app.post('/api/signup', api.signupApi);
 app.post('/api/contacts/new', token.authenticate, api.addContactApi);
